@@ -538,11 +538,11 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullThings
                             if (Me.Class == WoWClass.DeathKnight)
                             {SpellManager.Cast(49576);} // DeathKnight - Death Grip 30)
                             if (Me.Class == WoWClass.Druid)
-                            { SpellManager.Cast(8921);} // Druid - MoonFire 40)
+                            {SpellManager.Cast(8921);} // Druid - MoonFire 40)
                             if (Me.Class == WoWClass.Hunter)
-                            { SpellManager.Cast(3044);} // Hunter - Arcane Shot 40)
+                            {SpellManager.Cast(3044);} // Hunter - Arcane Shot 40)
                             if (Me.Class == WoWClass.Mage)
-                            { SpellManager.Cast(44614); Thread.Sleep(1500);} // Mage - Frostfire Bolt 40
+                            {SpellManager.Cast(44614); Thread.Sleep(1500);} // Mage - Frostfire Bolt 40
                             if (Me.Class == WoWClass.Monk)
                             {SpellManager.Cast(115546);} // Monk - Provoke 40)
                             if (Me.Class == WoWClass.Paladin)
@@ -552,7 +552,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullThings
                             if (Me.Class == WoWClass.Rogue)
                             {SpellManager.Cast(121733);} // Rogue - Throw 30)
                             if (Me.Class == WoWClass.Shaman)
-                            { SpellManager.Cast(403); Thread.Sleep(1500);} // Shaman - Lightning Bolt 30
+                            {SpellManager.Cast(403); Thread.Sleep(1500);} // Shaman - Lightning Bolt 30
                             if (Me.Class == WoWClass.Warlock)
                             {SpellManager.Cast(172);} // Warlock - Corruption 40)
                             if (Me.Class == WoWClass.Warrior)
