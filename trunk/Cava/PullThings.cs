@@ -537,6 +537,8 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullThings
                             {CurrentTarget.ToUnit().Face();}
                             if (Me.Class == WoWClass.DeathKnight)
                             {SpellManager.Cast(49576);} // DeathKnight - Death Grip 30)
+                            Thread.Sleep(1500);
+                            {SpellManager.Cast(49143);} // DeathKnight - Frost Strike)
                             if (Me.Class == WoWClass.Druid)
                             {SpellManager.Cast(8921);} // Druid - MoonFire 40)
                             if (Me.Class == WoWClass.Hunter)
@@ -545,6 +547,8 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullThings
                             {SpellManager.Cast(44614); Thread.Sleep(1500);} // Mage - Frostfire Bolt 40
                             if (Me.Class == WoWClass.Monk)
                             {SpellManager.Cast(115546);} // Monk - Provoke 40)
+                            Thread.Sleep(1500);
+                            {SpellManager.Cast(100780);} // Monk - Jab)
                             if (Me.Class == WoWClass.Paladin)
                             {SpellManager.Cast(20271);} // Paladin - Judgment 30
                             if (Me.Class == WoWClass.Priest)
