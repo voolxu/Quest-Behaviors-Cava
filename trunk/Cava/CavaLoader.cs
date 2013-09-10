@@ -139,8 +139,8 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
                             if (ProfileBaseToLoad == 4) { ProfileName = "[Quest]MOP85to90WithLootBy[Cava].xml"; }
                             if (ProfileBaseToLoad == 5) { ProfileName = "Armageddoner\\Next[Cava].xml"; }
                             if (ProfileBaseToLoad == 6) { ProfileName = "Armageddoner\\Next[Cava].xml"; }
-                            if (ProfileBaseToLoad == 7) { ProfileName = "PB\\MB\\emptymb600.xml"; }
-                            if (ProfileBaseToLoad == 8) { ProfileName = "Free_PB\\emptymb300.xml"; }
+                            if (ProfileBaseToLoad == 7) { ProfileName = "emptymb600.xml"; }
+                            if (ProfileBaseToLoad == 8) { ProfileName = "emptymb300.xml"; }
                             
                             if (ProfileBaseToLoad == 0)
                             {
