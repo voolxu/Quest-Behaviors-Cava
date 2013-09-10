@@ -30,7 +30,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
         {
             try
             {
-                ProfileBaseToLoad = GetAttributeAsNullable<int>("PBL", false, new ConstrainTo.Domain<int>(0, 5), null) ?? 0;
+                ProfileBaseToLoad = GetAttributeAsNullable<int>("PBL", false, new ConstrainTo.Domain<int>(0, 100), null) ?? 0;
             }
             catch (Exception except)
             {
@@ -49,9 +49,21 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
             {
             }
             [Setting, DefaultValue(false)]
+            public bool Armageddoner { get; set; }
+            [Setting, DefaultValue(false)]
+            public bool AllowUpdate { get; set; }
+            [Setting, DefaultValue(false)]
             public bool Allowlunch { get; set; }
             [Setting, DefaultValue(0)]
             public int BaseProfileToLunch { get; set; }
+            [Setting, DefaultValue(false)]
+            public bool AntiStuckSystem { get; set; }
+            [Setting, DefaultValue(false)]
+            public bool AutoShutdownWhenUpdate { get; set; }
+            [Setting, DefaultValue(false)]
+            public bool CheckAllowSummonPet { get; set; }
+            [Setting, DefaultValue(false)]
+            public bool PBMiningBlacksmithing { get; set; }
         }
         
         // Attributes provided by caller
@@ -121,14 +133,15 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
                             }
                             CPGlobalSettings.Instance.Allowlunch = false;
                             CPGlobalSettings.Instance.Save();
-
                             if (ProfileBaseToLoad == 1) { ProfileName = "Next[Cava].xml"; }
                             if (ProfileBaseToLoad == 2) { ProfileName = "[Quest]Pandaren-Horde1to90By[Cava].xml"; }
                             if (ProfileBaseToLoad == 3) { ProfileName = "[Quest]Pandaren-Alliance1to90By[Cava].xml"; }
                             if (ProfileBaseToLoad == 4) { ProfileName = "[Quest]MOP85to90WithLootBy[Cava].xml"; }
                             if (ProfileBaseToLoad == 5) { ProfileName = "Armageddoner\\Next[Cava].xml"; }
                             if (ProfileBaseToLoad == 6) { ProfileName = "Armageddoner\\Next[Cava].xml"; }
-
+                            if (ProfileBaseToLoad == 7) { ProfileName = "emptymb600.xml"; }
+                            if (ProfileBaseToLoad == 8) { ProfileName = "emptymb300.xml"; }
+                            
                             if (ProfileBaseToLoad == 0)
                             {
                                 _isBehaviorDone = true;
