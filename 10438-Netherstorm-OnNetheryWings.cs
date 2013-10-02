@@ -105,7 +105,7 @@ namespace Honorbuddy.Quest_Behaviors.SpecificQuests.OnNetheryWings
 
         protected override void Dispose(bool isExplicitlyInitiatedDispose)
         {
-            if (!_isDisposed)
+            if (!IsDisposed)
             {
                 if (_behaviorTreeHook_TaxiCheck != null)
                 {
@@ -150,10 +150,9 @@ namespace Honorbuddy.Quest_Behaviors.SpecificQuests.OnNetheryWings
         {
             return new Decorator(context => !IsDone && Me.OnTaxi,
                 new PrioritySelector(
-                    // Disable combat while on the Taxi...
-                    // NB: We don't use "&=" with BehaviorFlags, so the change will be properly recorded in the HB log.
-                    new Decorator(context => ((LevelBot.BehaviorFlags & BehaviorFlags.Combat) != 0),
-                        new Action(context => { LevelBot.BehaviorFlags = LevelBot.BehaviorFlags & ~BehaviorFlags.Combat; })),
+                     // Disable combat while on the Taxi...
+                    new Decorator(context => LevelBot.BehaviorFlags.HasFlag(BehaviorFlags.Combat),
+                        new Action(context => { LevelBot.BehaviorFlags &= ~BehaviorFlags.Combat; })),
 
                     // Just wait, if bomb is on cooldown...
                     new Decorator(context => Bomb.Cooldown > 0,
@@ -171,9 +170,8 @@ namespace Honorbuddy.Quest_Behaviors.SpecificQuests.OnNetheryWings
                 // PvP server considerations...
                 // Combat is disabled while on the Taxi.  If on the ground, we want it enabled
                 // in case we get attacked on a PvP server.
-                // NB: We don't use "|=" with BehaviorFlags, so the change will be properly recorded in the HB log.
-                new Decorator(context => ((LevelBot.BehaviorFlags & BehaviorFlags.Combat) == 0),
-                    new Action(context => { LevelBot.BehaviorFlags = LevelBot.BehaviorFlags | BehaviorFlags.Combat; })),
+                new Decorator(context => !LevelBot.BehaviorFlags.HasFlag(BehaviorFlags.Combat),
+                    new Action(context => { LevelBot.BehaviorFlags |= BehaviorFlags.Combat; })),
 
                 // Move to flight master, and interact to take taxi ride...
                 new Decorator(context => !Me.OnTaxi,
@@ -213,8 +211,7 @@ namespace Honorbuddy.Quest_Behaviors.SpecificQuests.OnNetheryWings
                                         context => FlightMaster.SafeName,
                                         context => MovementBy)),
                                 new UtilityBehaviorPS.MoveStop(),
-                                new Decorator(context => Me.Mounted,
-                                    new Action(context => { Mount.Dismount(); })),
+                                new Mount.ActionLandAndDismount(),
                                 new Decorator(context => !GossipFrame.Instance.IsVisible,
                                     new Action(context => { FlightMaster.Interact(); })),
                                 new Action(context => { GossipFrame.Instance.SelectGossipOption(0); })
