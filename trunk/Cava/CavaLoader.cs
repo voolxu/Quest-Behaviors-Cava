@@ -45,26 +45,28 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
         {
             public static readonly CPGlobalSettings Instance = new CPGlobalSettings();
             public CPGlobalSettings()
-                : base(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, string.Format(@"Plugins\CavaPlugin\Settings\Main-Settings.xml")))
+                : base(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, string.Format(@"Settings\CavaPlugin\Main-Settings.xml")))
             {
             }
-            [Setting, DefaultValue(false)]
-            public bool Armageddoner { get; set; }
-            [Setting, DefaultValue(false)]
-            public bool AllowUpdate { get; set; }
-            [Setting, DefaultValue(false)]
-            public bool Allowlunch { get; set; }
-            [Setting, DefaultValue(0)]
-            public int BaseProfileToLunch { get; set; }
-            [Setting, DefaultValue(false)]
-            public bool AntiStuckSystem { get; set; }
-            [Setting, DefaultValue(false)]
-            public bool AutoShutdownWhenUpdate { get; set; }
-            [Setting, DefaultValue(false)]
-            public bool CheckAllowSummonPet { get; set; }
-            [Setting, DefaultValue(false)]
-            public bool PBMiningBlacksmithing { get; set; }
-        }
+        [Setting, DefaultValue(false)]
+        public bool BotAllowUpdate { get; set; }
+        [Setting, DefaultValue(false)]
+        public bool AllowUpdate { get; set; }
+        [Setting, DefaultValue(false)]
+        public bool Allowlunch { get; set; }
+        [Setting, DefaultValue(0)]
+        public int BaseProfileToLunch { get; set; }
+        [Setting, DefaultValue(false)]
+        public bool AutoShutdownWhenUpdate { get; set; }
+        [Setting, DefaultValue(false)]
+        public bool PBMiningBlacksmithing { get; set; }
+        [Setting, DefaultValue(false)]
+        public bool BotPBMiningBlacksmithing { get; set; }
+        [Setting, DefaultValue(false)]
+        public bool RessAfterDie { get; set; }
+        [Setting, DefaultValue(0)]
+        public int language { get; set; }
+         }
         
         // Attributes provided by caller
         public String ProfileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, string.Format(@"Plugins\CavaPlugin\Settings\Main-Settings.xml"));
