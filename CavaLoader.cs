@@ -124,7 +124,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
                         {
                             if (!File.Exists(ProfileName))
                             {
-                                LogMessage("fatal", "CavaPlugin error.  Download or unpack problem with plugin?");
+                                LogMessage("fatal", "CavaPlugin error.  Download or unpack problem with file? {0}",ProfileName);
                                 _isBehaviorDone = true;
                                 return;
                             }
