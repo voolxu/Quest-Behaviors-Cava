@@ -20,9 +20,9 @@ using Styx.Pathing;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-
 using Action = Styx.TreeSharp.Action;
 using Honorbuddy.QuestBehaviorCore;
+
 
 namespace Honorbuddy.Quest_Behaviors.Cava.VehicleCanSelfHeal
 {
@@ -76,6 +76,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.VehicleCanSelfHeal
         public int VehicleId { get; private set; }
 
         // Private variables for internal state
+        private ConfigMemento _configMemento;
         private bool _isBehaviorDone;
         private bool _isDisposed;
         private bool _isInitialized;
@@ -138,6 +139,11 @@ namespace Honorbuddy.Quest_Behaviors.Cava.VehicleCanSelfHeal
                 }
 
                 // Clean up unmanaged resources (if any) here...
+                if (_configMemento != null)
+                { _configMemento.Dispose(); }
+
+                _configMemento = null;
+
                 BotEvents.OnBotStop -= BotEvents_OnBotStop;
                 BotEvents.Player.OnPlayerDied -= Player_OnPlayerDied;
                 Targeting.Instance.RemoveTargetsFilter -= Instance_RemoveTargetsFilter;
@@ -398,7 +404,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.VehicleCanSelfHeal
                 // More info about how the ConfigMemento applies to saving and restoring user configuration
                 // can be found here...
                 //     http://www.thebuddyforum.com/mediawiki/index.php?title=Honorbuddy_Programming_Cookbook:_Saving_and_Restoring_User_Configuration
-
+                _configMemento = new ConfigMemento();
 
                 BotEvents.Player.OnPlayerDied += Player_OnPlayerDied;
                 BotEvents.OnBotStop += BotEvents_OnBotStop;
@@ -416,7 +422,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.VehicleCanSelfHeal
                 CharacterSettings.Instance.SkinMobs = false;
                 CharacterSettings.Instance.RessAtSpiritHealers = true;
 
-                TreeRoot.GoalText = GetType().Name + ": In Progress";
+                TreeRoot.GoalText = this.GetType().Name + ": In Progress";
             }
         }
 
