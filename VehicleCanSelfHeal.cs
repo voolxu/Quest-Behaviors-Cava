@@ -22,7 +22,7 @@ using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
 using Action = Styx.TreeSharp.Action;
-
+using Honorbuddy.QuestBehaviorCore;
 
 namespace Honorbuddy.Quest_Behaviors.Cava.VehicleCanSelfHeal
 {
