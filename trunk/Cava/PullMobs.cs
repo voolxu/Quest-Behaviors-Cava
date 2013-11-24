@@ -9,7 +9,7 @@
 //      Creative Commons // 171 Second Street, Suite 300 // San Francisco, California, 94105, USA.
 //
 // DOCUMENTATION:
-//      http://www.thebuddyforum.com/mediawiki/index.php?title=Honorbuddy_Custom_Behavior:_PullThings
+//      http://www.thebuddyforum.com/mediawiki/index.php?title=Honorbuddy_Custom_Behavior:_PullMobs
 //     
 // QUICK DOX:
 //      Collects items from mobs or objects when (right-click) 'interaction' is required.
@@ -60,18 +60,12 @@
 //              this value coupled with the CollectionDistance.
 // 
 // Exmaples:
-// <CustomBehavior File="PullThings" ...other args... >
+// <CustomBehavior File="Cava\PullMobs" ...other args... >
 //     <Hotspot Name="Cathedral Square fishing dock" X="4554.003" Y="-4718.743" Z="883.0464" StartPoint="true" />
 //     <Hotspot Name="The Shady Lady" X="4578.725" Y="-4721.257" Z="882.8724" />
 //     <Hotspot Name="The Blue Recluse" X="4584.166" Y="-4693.487" Z="882.7331" StartPoint="true" />
 // </CustomBehavior>
-//
-
-// Added by Cava
-// PullMob [Default: False]
-//      This is useful if the mob is flying/cant direct interact with then , behavior will use any know spell id to pull the mob.
-
-
+// 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -81,6 +75,9 @@ using System.Xml;
 using System.Xml.Linq;
 
 using CommonBehaviors.Actions;
+
+using Honorbuddy.QuestBehaviorCore;
+
 using Styx;
 using Styx.CommonBot;
 using Styx.CommonBot.Frames;
@@ -96,10 +93,10 @@ using Styx.WoWInternals.World;
 using Action = Styx.TreeSharp.Action;
 
 
-namespace Honorbuddy.Quest_Behaviors.Cava.PullThings
+namespace Honorbuddy.Quest_Behaviors.Cava.PullMobs
 {
-    [CustomBehaviorFileName(@"Cava\PullThings")]
-    public class PullThings : CustomForcedBehavior
+    [CustomBehaviorFileName(@"Cava\PullMobs")]
+    public class PullMobs : CustomForcedBehavior
     {
         public enum CollectUntilType
         {
@@ -115,7 +112,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullThings
             DontCare,
         }
 
-        public PullThings(Dictionary<string, string> args)
+        public PullMobs(Dictionary<string, string> args)
             : base(args)
         {
             try
@@ -148,7 +145,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullThings
                 QuestId = GetAttributeAsNullable<int>("QuestId", isQuestIdRequired, ConstrainAs.QuestId(this), null) ?? 0;
                 QuestRequirementComplete = GetAttributeAsNullable<QuestCompleteRequirement>("QuestCompleteRequirement", false, null, null) ?? QuestCompleteRequirement.NotComplete;
                 QuestRequirementInLog = GetAttributeAsNullable<QuestInLogRequirement>("QuestInLogRequirement", false, null, null) ?? QuestInLogRequirement.InLog;
-                PullMob = GetAttributeAsNullable<bool>("PullMob", false, null, null) ?? false;
+                PullMob = GetAttributeAsNullable<bool>("PullMob", false, null, null) ?? false;//added
 
 
                 // Semantic coherency --
@@ -225,9 +222,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullThings
         public int QuestId { get; private set; }
         public QuestCompleteRequirement QuestRequirementComplete { get; private set; }
         public QuestInLogRequirement QuestRequirementInLog { get; private set; }
-
-        // Added by Cava
-        public bool PullMob { get; private set; }
+        public bool PullMob { get; private set; }//added
 
         // Private properties and data...
         private HuntingGroundBehavior _behavior_HuntingGround;
@@ -242,7 +237,6 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullThings
         private readonly TimeSpan Delay_MobConsumedExpiry = TimeSpan.FromMinutes(7);
         private readonly TimeSpan Delay_BlacklistPlayerTooClose = TimeSpan.FromSeconds(90);
         private TimeSpan Delay_WowClientLagTime { get { return (TimeSpan.FromMilliseconds((StyxWoW.WoWClient.Latency * 2) + 150)); } }
-        private readonly TimeSpan Delay_WoWClientMovementThrottle = TimeSpan.FromMilliseconds(500);
         private string ItemName { get; set; }
         private static LocalPlayer Me { get { return (StyxWoW.Me); } }
 
@@ -258,11 +252,11 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullThings
         }
 
         // DON'T EDIT THESE--they are auto-populated by Subversion
-        public override string SubversionId { get { return ("$Id: PullThings.cs 501 2013-05-10 16:29:10Z chinajade $"); } }
-        public override string SubversionRevision { get { return ("$Revision: 501 $"); } }
+        public override string SubversionId { get { return ("$Id: PullMobs.cs 719 2013-07-26 11:08:04Z dogan $"); } }
+        public override string SubversionRevision { get { return ("$Revision: 719 $"); } }
 
 
-        ~PullThings()
+        ~PullMobs()
         {
             Dispose(false);
         }
@@ -342,16 +336,13 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullThings
             bool isViable;
 
             if (target == null)
-            { return (false); }
+                { return (false); }
 
             isViable = (target.IsValid
                         && (MobIds.Contains((int)target.Entry) || ObjectIds.Contains((int)target.Entry))
                         && !target.IsLocallyBlacklisted()
                         && !BlacklistIfPlayerNearby(target)
-                        && (IgnoreMobsInBlackspots
-                            ? Targeting.IsTooNearBlackspot(ProfileManager.CurrentProfile.Blackspots,
-                                                            target.Location)
-                            : true));
+                        && Query.IsStateMatch_IgnoreMobsInBlackspots(target, IgnoreMobsInBlackspots));
 
             if (isViable && (target is WoWUnit))
             {
@@ -498,7 +489,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullThings
                     _behavior_SwimBreath.CreateBehavior(),
 
                     // If there is loot to clean up...
-                    new Decorator(context => CharacterSettings.Instance.LootMobs,
+                    new Decorator(context => LootTargeting.LootMobs,
                         _behavior_UnderwaterLooting.CreateBehavior(() => true)),
 
                     // Find next target...
@@ -528,44 +519,44 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullThings
                         return (RunStatus.Failure);     // Fall through
                     }),
 
-
                     //Added by Cava
                     new Decorator(ret => PullMob && !Me.IsCasting && CurrentTarget.Location.Distance(Me.Location) < 30,
-                        new Action(delegate {
-                            WoWMovement.MoveStop();
-                            if (!Me.IsSafelyFacing(CurrentTarget))
-                            {CurrentTarget.ToUnit().Face();}
-                            if (Me.Class == WoWClass.DeathKnight)
-                            {SpellManager.Cast(49576);} // DeathKnight - Death Grip 30)
-                            Thread.Sleep(1500);
-                            {SpellManager.Cast(49143);} // DeathKnight - Frost Strike)
-                            if (Me.Class == WoWClass.Druid)
-                            {SpellManager.Cast(8921);} // Druid - MoonFire 40)
-                            if (Me.Class == WoWClass.Hunter)
-                            {SpellManager.Cast(3044);} // Hunter - Arcane Shot 40)
-                            if (Me.Class == WoWClass.Mage)
-                            {SpellManager.Cast(44614); Thread.Sleep(1500);} // Mage - Frostfire Bolt 40
-                            if (Me.Class == WoWClass.Monk)
-                            {SpellManager.Cast(115546);} // Monk - Provoke 40)
-                            Thread.Sleep(1500);
-                            {SpellManager.Cast(100780);} // Monk - Jab)
-                            if (Me.Class == WoWClass.Paladin)
-                            {SpellManager.Cast(20271);} // Paladin - Judgment 30
-                            if (Me.Class == WoWClass.Priest)
-                            {SpellManager.Cast(589);} // Priest - Shadow Word: Pain 40)
-                            if (Me.Class == WoWClass.Rogue)
-                            {SpellManager.Cast(121733);} // Rogue - Throw 30)
-                            if (Me.Class == WoWClass.Shaman)
-                            {SpellManager.Cast(403); Thread.Sleep(1500);} // Shaman - Lightning Bolt 30
-                            if (Me.Class == WoWClass.Warlock)
-                            {SpellManager.Cast(172);} // Warlock - Corruption 40)
-                            if (Me.Class == WoWClass.Warrior)
-                            {SpellManager.Cast(122475);} // Warrior - Throw 30)
-                            Thread.Sleep(1500);
-                            return (RunStatus.Failure);
-                        })
+                        new Action(delegate
+            {
+                WoWMovement.MoveStop();
+                if (!Me.IsSafelyFacing(CurrentTarget))
+                { CurrentTarget.ToUnit().Face(); }
+                if (Me.Class == WoWClass.DeathKnight)
+                { SpellManager.Cast(49576); } // DeathKnight - Death Grip 30)
+                Thread.Sleep(1500);
+                { SpellManager.Cast(49143); } // DeathKnight - Frost Strike)
+                if (Me.Class == WoWClass.Druid)
+                { SpellManager.Cast(8921); } // Druid - MoonFire 40)
+                if (Me.Class == WoWClass.Hunter)
+                { SpellManager.Cast(3044); } // Hunter - Arcane Shot 40)
+                if (Me.Class == WoWClass.Mage)
+                { SpellManager.Cast(44614); Thread.Sleep(1500); } // Mage - Frostfire Bolt 40
+                if (Me.Class == WoWClass.Monk)
+                { SpellManager.Cast(115546); } // Monk - Provoke 40)
+                Thread.Sleep(1500);
+                { SpellManager.Cast(100780); } // Monk - Jab)
+                if (Me.Class == WoWClass.Paladin)
+                { SpellManager.Cast(20271); } // Paladin - Judgment 30
+                if (Me.Class == WoWClass.Priest)
+                { SpellManager.Cast(589); } // Priest - Shadow Word: Pain 40)
+                if (Me.Class == WoWClass.Rogue)
+                { SpellManager.Cast(121733); } // Rogue - Throw 30)
+                if (Me.Class == WoWClass.Shaman)
+                { SpellManager.Cast(403); Thread.Sleep(1500); } // Shaman - Lightning Bolt 30
+                if (Me.Class == WoWClass.Warlock)
+                { SpellManager.Cast(172); } // Warlock - Corruption 40)
+                if (Me.Class == WoWClass.Warrior)
+                { SpellManager.Cast(122475); } // Warrior - Throw 30)
+                Thread.Sleep(1500);
+                return (RunStatus.Failure);
+            })
                     ),
-
+                    
                     // If we're not at target, move to it...
                     _behavior_HuntingGround.CreateBehavior_MoveToTarget(),
 
@@ -1392,7 +1383,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullThings
         public Composite CreateBehavior(ForceLootDelegate forceLoot)
         {
             return (_behaviorRoot ?? (_behaviorRoot =
-                new Decorator(ret => ((CharacterSettings.Instance.LootMobs || forceLoot()) && (LootList.Count() > 0)),
+                new Decorator(ret => ((LootTargeting.LootMobs || forceLoot()) && (LootList.Any())),
                     new PrioritySelector(
 
                         // If we're swimming, we need to do loot cleanup for ourselves...
