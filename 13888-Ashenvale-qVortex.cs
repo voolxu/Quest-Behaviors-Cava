@@ -1,106 +1,117 @@
-﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-
+using CommonBehaviors.Actions;
 using Styx;
 using Styx.CommonBot;
 using Styx.CommonBot.Profiles;
-using Styx.CommonBot.Routines;
-using Styx.Helpers;
-using Styx.Pathing;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-
 using Action = Styx.TreeSharp.Action;
 
-
+// ReSharper disable CheckNamespace
 namespace Honorbuddy.Quest_Behaviors.Cava.QVortex
+// ReSharper restore CheckNamespace
 {
-    [CustomBehaviorFileName(@"Cava\13888-Ashenvale-qVortex")]
-    public class _13888:CustomForcedBehavior
-    {
-        public _13888(Dictionary<string, string> Args)
-            : base(Args)
-        {
-            QuestId = GetAttributeAsNullable<int>("QuestId", false, ConstrainAs.QuestId(this), null) ?? 0;
-        }
+	[CustomBehaviorFileName(@"Cava\13888-Ashenvale-QVortex")]
+    // ReSharper disable UnusedMember.Global
+	public class QVortex : CustomForcedBehavior
+    // ReSharper restore UnusedMember.Global
+	{
+		public QVortex(Dictionary<string, string> args)
+			: base(args)
+		{
+			QuestId = 13888;
+		}
 
-        public int QuestId { get; set; }
-        public QuestCompleteRequirement questCompleteRequirement = QuestCompleteRequirement.NotComplete;
-        public QuestInLogRequirement questInLogRequirement = QuestInLogRequirement.InLog;
-        private bool IsBehaviorDone = false;
-        private Composite _root;
-        public List<WoWUnit> q13888_magmathar
-        {
-            get
-            {
-                return ObjectManager.GetObjectsOfType<WoWUnit>().Where(ret => (ret.Entry == 34295 && !StyxWoW.Me.IsDead)).OrderBy(ret => ret.Distance).ToList();
-            }
-        }
-        public List<WoWUnit> q13888_vehicle
-        {
-            get
-            {
-                return ObjectManager.GetObjectsOfType<WoWUnit>().Where(ret => (ret.Entry == 34222 && !StyxWoW.Me.IsDead)).OrderBy(ret => ret.Distance).ToList();
-            }
-        }
-        public override bool IsDone
-        {
-            get
-            {
-                return (IsBehaviorDone);
-            }
-        }
-        public override void OnStart()
-        {
-            OnStart_HandleAttributeProblem();
-            if (!IsDone)
-            {
-                PlayerQuest Quest = StyxWoW.Me.QuestLog.GetQuestById((uint)QuestId);
-                TreeRoot.GoalText = ((Quest != null) ? ("\"" + Quest.Name + "\"") : "In Progress");
-            }
-        }
-        protected override Composite CreateBehavior()
-        {
-            return _root ?? (_root =
-                new PrioritySelector(
-                    new Decorator(
-                        ret => q13888_magmathar[0].IsAlive,
-                        new PrioritySelector(
-                            new Decorator(
-                                ret => StyxWoW.Me.CurrentTarget != q13888_magmathar[0],
-                                new Sequence(
-                                    new Action(ret => 
-                                    {
-							            if (q13888_magmathar.Count > 0 && q13888_magmathar[0].Location.Distance(StyxWoW.Me.Location) > 100)
-							            {
-								            Thread.Sleep(1000);
-							            }
-							            if (q13888_magmathar.Count > 0 && (q13888_magmathar[0].Location.Distance(StyxWoW.Me.Location) <= 100))
-							            {
-                                            while (!StyxWoW.Me.QuestLog.GetQuestById(13888).IsCompleted)
-                                            {
-                                                q13888_magmathar[0].Face();
-                                                q13888_magmathar[0].Target();
-                                                Lua.DoString("CastPetAction(1)");
-                                                Thread.Sleep(200);
-                                                Lua.DoString("CastPetAction(2)");
-                                                Thread.Sleep(200);
-                                                Lua.DoString("CastPetAction(3)");
-                                                Thread.Sleep(200);
-                                            }
-							            }
-                                    }))))),
-                     new Decorator(
-                         ret => StyxWoW.Me.QuestLog.GetQuestById(13888).IsCompleted,
-                         new Sequence(
-                             new Action(ret => Lua.DoString("CastPetAction(5)")),
-                             new Action(ret => IsBehaviorDone = true)))
-                    ));
+	    private int QuestId { get; set; }
+		private bool _isBehaviorDone;
+		private Composite _root;
+	    private static bool OnCooldown1 { get { return Lua.GetReturnVal<int>("a,b,c=GetActionCooldown(121);if b==0 then return 1 else return 0 end", 0) == 0; } }
+	    private static bool OnCooldown2 { get { return Lua.GetReturnVal<int>("a,b,c=GetActionCooldown(122);if b==0 then return 1 else return 0 end", 0) == 0; } }
+	    private static bool OnCooldown3 { get { return Lua.GetReturnVal<int>("a,b,c=GetActionCooldown(123);if b==0 then return 1 else return 0 end", 0) == 0; } }
+	    private static bool InVehicle { get { return Lua.GetReturnVal<int>("if IsPossessBarVisible() or UnitInVehicle('player') or not(GetBonusBarOffset()==0) then return 1 else return 0 end", 0) == 1; } }
+		public override bool IsDone { get { return _isBehaviorDone; }}
+	    private WoWUnit MobMagmathar { get { return ObjectManager.GetObjectsOfType<WoWUnit>().Where (u => u.Entry == 34295 && u.IsAlive && u.Distance < 80).OrderBy(u => u.Distance).FirstOrDefault(); }}
+		public override void OnStart()
+		{
+			OnStart_HandleAttributeProblem();
+			if (!IsDone)
+			{
+				if (TreeRoot.Current != null && TreeRoot.Current.Root != null && TreeRoot.Current.Root.LastStatus != RunStatus.Running)
+				{
+					var currentRoot = TreeRoot.Current.Root;
+				    var composite = currentRoot as GroupComposite;
+				    if (composite != null)
+					{
+						var root = composite;
+						root.InsertChild(0, CreateBehavior());
+					}
+				}
+				PlayerQuest quest = StyxWoW.Me.QuestLog.GetQuestById((uint)QuestId);
+				TreeRoot.GoalText = ((quest != null) ? ("\"" + quest.Name + "\"") : "In Progress");
+			}
+		}
 
-        }
-    }
+	    private bool IsQuestComplete()
+		{
+			var quest = StyxWoW.Me.QuestLog.GetQuestById((uint)QuestId);
+			return quest == null || quest.IsCompleted;
+		}
+
+	    private Composite DoneYet
+		{
+			get
+			{
+				return
+					new Decorator(ret => IsQuestComplete(), new Action(delegate
+					{
+						if (InVehicle)
+							Lua.DoString("CastPetAction(5)");
+						_isBehaviorDone = true;
+						return RunStatus.Success;
+					}));
+			}
+		}
+
+	    private Composite KillBoss
+		{
+			get
+			{
+				return new Decorator(context => MobMagmathar != null,
+						new Action(context =>
+						{
+							MobMagmathar.Target();
+						    if (!OnCooldown1)
+						    {
+						        Lua.DoString("CastPetAction(1)");
+						        Thread.Sleep(500);
+						    }
+						    if (!OnCooldown2)
+						    {
+						        Lua.DoString("CastPetAction(2)");
+                                Thread.Sleep(500);
+						    }
+                            if (!OnCooldown3)
+						    {
+						        Lua.DoString("CastPetAction(3)");
+                                Thread.Sleep(500);
+						    }
+                            return RunStatus.Success;
+						}));
+			}
+		}
+
+		protected override Composite CreateBehavior()
+		{
+			return _root ?? (_root = new Decorator(ret => !_isBehaviorDone,
+				new PrioritySelector(
+					new Decorator(context => !InVehicle,
+						new Action(context => { _isBehaviorDone = true; })),
+					DoneYet,
+					KillBoss,
+					new ActionAlwaysSucceed())));
+		}
+	}
 }
