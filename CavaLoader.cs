@@ -66,7 +66,9 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
         public bool RessAfterDie { get; set; }
         [Setting, DefaultValue(0)]
         public int language { get; set; }
-         }
+        [Setting, DefaultValue(false)]
+        public bool languageselected { get; set; }
+        }
         
         // Attributes provided by caller
         public String ProfileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, string.Format(@"Plugins\CavaPlugin\Settings\Main-Settings.xml"));
