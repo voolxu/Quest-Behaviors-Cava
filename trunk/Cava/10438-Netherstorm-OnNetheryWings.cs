@@ -1,8 +1,21 @@
-// Behavior originally contributed by mastahg / rework by chinajadeb
+// Behavior originally contributed by mastahg / rework by chinajade MurkethAndShaadraz
 //
-// DOCUMENTATION:
-//     
+// LICENSE:
+// This work is licensed under the
+//     Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
+// also known as CC-BY-NC-SA.  To view a copy of this license, visit
+//      http://creativecommons.org/licenses/by-nc-sa/3.0/
+// or send a letter to
+//      Creative Commons // 171 Second Street, Suite 300 // San Francisco, California, 94105, USA.
 //
+
+#region Summary and Documentation
+#endregion
+
+
+#region Examples
+#endregion
+
 
 #region Usings
 using System;
@@ -11,11 +24,8 @@ using System.Linq;
 using System.Xml.Linq;
 
 using Bots.Grind;
-
 using CommonBehaviors.Actions;
-
 using Honorbuddy.QuestBehaviorCore;
-
 using Styx;
 using Styx.Common;
 using Styx.CommonBot;
@@ -29,7 +39,7 @@ using Action = Styx.TreeSharp.Action;
 #endregion
 
 
-namespace Honorbuddy.Quest_Behaviors.SpecificQuests.OnNetheryWings
+namespace Honorbuddy.Quest_Behaviors.Cava.OnNetheryWings
 {
     [CustomBehaviorFileName(@"Cava\10438-Netherstorm-OnNetheryWings")]
     public class OnNetheryWings : QuestBehaviorBase
@@ -52,9 +62,7 @@ namespace Honorbuddy.Quest_Behaviors.SpecificQuests.OnNetheryWings
                 // * The Honorbuddy core was changed, and the behavior wasn't adjusted for the new changes.
                 // In any case, we pinpoint the source of the problem area here, and hopefully it
                 // can be quickly resolved.
-                LogMessage("error",
-                           "BEHAVIOR MAINTENANCE PROBLEM: " + except.Message + "\nFROM HERE:\n" + except.StackTrace +
-                           "\n");
+                QBCLog.Exception(except);
                 IsAttributeProblem = true;
             }
         }
@@ -98,14 +106,18 @@ namespace Honorbuddy.Quest_Behaviors.SpecificQuests.OnNetheryWings
 
 
         #region Destructor, Dispose, and cleanup
-        ~OnNetheryWings()
-        {
-            Dispose(false);
-        }
+        #endregion
 
-        protected override void Dispose(bool isExplicitlyInitiatedDispose)
+
+        #region Overrides of CustomForcedBehavior
+        // DON'T EDIT THESE--they are auto-populated by Subversion
+        public override string SubversionId { get { return ("$Id: 10438-Netherstorm-OnNetheryWings.cs 1129 2013-12-16 02:18:51Z Dogan $"); } }
+        public override string SubversionRevision { get { return ("$Rev: 1129 $"); } }
+
+
+        public override void OnFinished()
         {
-            if (!IsDisposed)
+            if (!IsOnFinishedRun)
             {
                 if (_behaviorTreeHook_TaxiCheck != null)
                 {
@@ -113,28 +125,27 @@ namespace Honorbuddy.Quest_Behaviors.SpecificQuests.OnNetheryWings
                     _behaviorTreeHook_TaxiCheck = null;
                 }
 
-                base.Dispose(isExplicitlyInitiatedDispose);
+                // QuestBehaviorBase.OnFinished() will set IsOnFinishedRun...
+                base.OnFinished();
             }
         }
-        #endregion
 
 
-        #region Overrides of CustomForcedBehavior
         public override void OnStart()
         {
             // Let QuestBehaviorBase do basic initializaion of the behavior, deal with bad or deprecated attributes,
             // capture configuration state, install BT hooks, etc.  This will also update the goal text.
-            OnStart_QuestBehaviorCore(string.Empty);
+            var isBehaviorShouldRun = OnStart_QuestBehaviorCore(string.Empty);
 
             // If the quest is complete, this behavior is already done...
             // So we don't want to falsely inform the user of things that will be skipped.
-            if (!IsDone)
+            if (isBehaviorShouldRun)
             {
                 MobId_FlightMaster = Me.IsAlliance
                     ? 20903     // Wing Commander Dabir'ee
                     : 20903;    // Wing Commander Brack
                 WaitLocation =
-                    Me.IsAlliance  
+                    Me.IsAlliance
                     ? new WoWPoint(4275.45, 2126.647, 138.5369).FanOutRandom(4.0)      // Wing Commander Dabir'ee
                     : new WoWPoint(4275.45, 2126.647, 138.5369).FanOutRandom(4.0);    // Wing Commander Brack
 
@@ -150,7 +161,7 @@ namespace Honorbuddy.Quest_Behaviors.SpecificQuests.OnNetheryWings
         {
             return new Decorator(context => !IsDone && Me.OnTaxi,
                 new PrioritySelector(
-                     // Disable combat while on the Taxi...
+                    // Disable combat while on the Taxi...
                     new Decorator(context => LevelBot.BehaviorFlags.HasFlag(BehaviorFlags.Combat),
                         new Action(context => { LevelBot.BehaviorFlags &= ~BehaviorFlags.Combat; })),
 
