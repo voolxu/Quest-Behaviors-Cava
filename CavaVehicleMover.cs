@@ -1,4 +1,4 @@
-﻿// Behavior originally contributed by HighVoltz / revamp by Chinajade
+ // Behavior originally contributed by HighVoltz / revamp by Chinajade
 //
 // LICENSE:
 // This work is licensed under the
@@ -10,7 +10,7 @@
 
 
 #region Summary and Documentation
-// CavaVehicleMover performs the following functions:
+// VEHICLEMOVER performs the following functions:
 // * Looks for an identified vehicle in the nearby area and mounts it
 //      The behavior seeks vehicles that have no players nearby.
 // * Drives the vehicle to the given destination location or destination NPC
@@ -171,7 +171,7 @@ using Action = Styx.TreeSharp.Action;
 #endregion
 
 
-namespace Honorbuddy.Quest_Behaviors.Vehicles.CavaVehicleMover
+namespace Honorbuddy.Quest_Behaviors.Cava.CavaVehicleMover
 {
     [CustomBehaviorFileName(@"Cava\CavaVehicleMover")]
     public class CavaVehicleMover : QuestBehaviorBase
@@ -218,29 +218,10 @@ namespace Honorbuddy.Quest_Behaviors.Vehicles.CavaVehicleMover
                 // * The Honorbuddy core was changed, and the behavior wasn't adjusted for the new changes.
                 // In any case, we pinpoint the source of the problem area here, and hopefully it
                 // can be quickly resolved.
-                QBCLog.Error("[MAINTENANCE PROBLEM]: " + except.Message
-                            + "\nFROM HERE:\n"
-                            + except.StackTrace + "\n");
+                QBCLog.Exception(except);
                 IsAttributeProblem = true;
             }
         }
-
-        // Attributes provided by caller
-        public int AuraId_ProxyVehicle { get; private set; }
-        public int NumOfTimes { get; private set; }
-        public int CastTime { get; private set; }
-        public bool Hop { get; private set; }
-        public bool IgnoreCombat { get; private set; }
-        public WoWPoint Destination { get; private set; }
-        public int[] MobIds { get; private set; }
-        public double Precision { get; private set; }
-        public int SpellId { get; private set; }
-        public int[] VehicleIds { get; private set; }
-        private bool WaitForVehicle { get; set; }
-
-        // DON'T EDIT THESE--they are auto-populated by Subversion
-        public override string SubversionId { get { return ("$Id: CavaVehicleMover.cs 574 2013-06-28 08:54:59Z chinajade $"); } }
-        public override string SubversionRevision { get { return ("$Revision: 574 $"); } }
 
 
         protected override void EvaluateUsage_DeprecatedAttributes(XElement xElement)
@@ -258,6 +239,20 @@ namespace Honorbuddy.Quest_Behaviors.Vehicles.CavaVehicleMover
         {
             // empty, for now...
         }
+
+
+        // Attributes provided by caller
+        public int AuraId_ProxyVehicle { get; private set; }
+        public int CastTime { get; private set; }
+        public WoWPoint Destination { get; private set; }
+        public bool Hop { get; private set; }
+        public bool IgnoreCombat { get; private set; }
+        public int[] MobIds { get; private set; }
+        public int NumOfTimes { get; private set; }
+        public double Precision { get; private set; }
+        public int SpellId { get; private set; }
+        public int[] VehicleIds { get; private set; }
+        private bool WaitForVehicle { get; set; }
         #endregion
 
 
@@ -273,27 +268,37 @@ namespace Honorbuddy.Quest_Behaviors.Vehicles.CavaVehicleMover
 
 
         #region Destructor, Dispose, and cleanup
-        ~CavaVehicleMover()
-        {
-            Dispose(false);
-        }
         #endregion
 
 
         #region Overrides of CustomForcedBehavior
+        // DON'T EDIT THESE--they are auto-populated by Subversion
+        public override string SubversionId { get { return ("$Id: CavaVehicleMover.cs 1129 2013-12-16 02:18:51Z Dogan $"); } }
+        public override string SubversionRevision { get { return ("$Revision: 1129 $"); } }
+
+        // CreateBehavior supplied by QuestBehaviorBase.
+        // Instead, provide CreateMainBehavior definition.
+
+        // Dispose provided by QuestBehaviorBase.
+
+        // IsDone provided by QuestBehaviorBase.
+        // Call the QuestBehaviorBase.BehaviorDone() method when you want to indicate your behavior is complete.
+
+        // OnFinished provided by QuestBehaviorBase.
 
         public override void OnStart()
         {       
             // Let QuestBehaviorBase do basic initializaion of the behavior, deal with bad or deprecated attributes,
             // capture configuration state, install BT hooks, etc.  This will also update the goal text.
-            OnStart_QuestBehaviorCore(
-                string.Format("Returning {0} to {1}",
-                    string.Join(", ", VehicleIds.Select(o => Utility.GetObjectNameFromId(o)).Distinct()),
-                    Destination));
+            var isBehaviorShouldRun =
+                OnStart_QuestBehaviorCore(
+                    string.Format("Returning {0} to {1}",
+                        string.Join(", ", VehicleIds.Select(o => Utility.GetObjectNameFromId(o)).Distinct()),
+                        Destination));
 
             // If the quest is complete, this behavior is already done...
             // So we don't want to falsely inform the user of things that will be skipped.
-            if (!IsDone)
+            if (isBehaviorShouldRun)
             {
                 // Disable any settings that may interfere with the escort --
                 // When we escort, we don't want to be distracted by other things.
@@ -526,6 +531,7 @@ namespace Honorbuddy.Quest_Behaviors.Vehicles.CavaVehicleMover
         private bool IsInVehicle()
         {
             return Me.HasAura(AuraId_ProxyVehicle);
+                //Query.IsInVehicle() || Me.HasAura(AuraId_ProxyVehicle);
         }
         #endregion
     }
