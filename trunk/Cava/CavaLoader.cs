@@ -68,6 +68,16 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
         public int language { get; set; }
         [Setting, DefaultValue(false)]
         public bool languageselected { get; set; }
+        [Setting, DefaultValue("")]
+        public string CpLogin { get; set; }
+        [Setting, DefaultValue("")]
+        public string CpPassword { get; set; }
+        [Setting, DefaultValue(false)]
+        public bool CpPanelBack { get; set; }
+        [Setting, DefaultValue(false)]
+        public bool ArmaPanelBack { get; set; }
+        [Setting, DefaultValue(false)]
+        public bool ProfMinBlack600 { get; set; }
         }
         
         // Attributes provided by caller
