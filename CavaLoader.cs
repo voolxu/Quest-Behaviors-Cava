@@ -151,8 +151,8 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
                             if (ProfileBaseToLoad == 2) { ProfileName = "[Quest]Pandaren-Horde1to90By[Cava].xml"; }
                             if (ProfileBaseToLoad == 3) { ProfileName = "[Quest]Pandaren-Alliance1to90By[Cava].xml"; }
                             if (ProfileBaseToLoad == 4) { ProfileName = "[Quest]MOP85to90WithLootBy[Cava].xml"; }
-                            if (ProfileBaseToLoad == 5) { ProfileName = "Armageddoner\\Next[Cava].xml"; }
-                            if (ProfileBaseToLoad == 6) { ProfileName = "Armageddoner\\Next[Cava].xml"; }
+                            if (ProfileBaseToLoad == 5) { ProfileName = "ArmageddonerNext[Cava].xml"; }
+                            if (ProfileBaseToLoad == 6) { ProfileName = "ArmageddonerNext[Cava].xml"; }
                             if (ProfileBaseToLoad == 7) { ProfileName = "emptymb600.xml"; }
                             if (ProfileBaseToLoad == 8) { ProfileName = "emptymb300.xml"; }
                             
