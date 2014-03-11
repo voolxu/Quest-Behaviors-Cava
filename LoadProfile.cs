@@ -323,6 +323,10 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                                     html = sr.ReadToEnd();
                                 }
                                 response.Close();
+			                          File.WriteAllText(Path.Combine(Path.GetDirectoryName(ProfileManager.XmlLocation), ProfileName), Encoding.UTF8.GetString(Convert.FromBase64String(html)));
+																ProfileManager.LoadNew(Path.Combine(Path.GetDirectoryName(ProfileManager.XmlLocation), ProfileName), false);
+          
+																/*
                                 var reader = new StreamReader(new MemoryStream(Convert.FromBase64String(html)));
                                 XElement xml = XElement.Parse(reader.ReadToEnd());
                                 var Profile = new Profile(xml, null);
@@ -331,6 +335,12 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                                 QuestState.Instance.Order.UpdateNodes();
 																using (var ms = new MemoryStream(Convert.FromBase64String(html)))
 																ProfileManager.LoadNew(ms);			
+																*/
+                                //string profile = Encoding.UTF8.GetString(Convert.FromBase64String(html));
+																//string profile = Convert.FromBase64String(html);
+																//string path = Path.Combine(Path.GetDirectoryName(ProfileManager.XmlLocation), ProfileName);
+                                File.Delete(Path.Combine(Path.GetDirectoryName(ProfileManager.XmlLocation), ProfileName));
+															
                             }
                             catch (Exception ex)
                             {
