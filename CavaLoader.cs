@@ -104,6 +104,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
         public override string SubversionRevision { get { return ("$Revision: 369 $"); } }
         public int ProfileBaseToLoad { get; private set; }
 
+				
         ~CavaLoader()
         {
             Dispose(false);
