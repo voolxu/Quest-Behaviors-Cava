@@ -31,7 +31,9 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
             try
             {
                 ProfileBaseToLoad = GetAttributeAsNullable<int>("PBL", false, new ConstrainTo.Domain<int>(0, 100), null) ?? 0;
-            }
+                ProfileName = GetAttributeAs<string>("ProfileName", true, ConstrainAs.StringNonEmpty, new[] { "Profile" }) ?? "";
+
+								}
             catch (Exception except)
             {
                LogMessage("error", "BEHAVIOR MAINTENANCE PROBLEM: " + except.Message
@@ -40,7 +42,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
                IsAttributeProblem = true;
             }
         }
-
+        public String ProfileName { get; private set; }
         public class CPGlobalSettings : Settings
         {
             public static readonly CPGlobalSettings Instance = new CPGlobalSettings();
@@ -81,7 +83,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
         }
         
         // Attributes provided by caller
-        public String ProfileName = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, string.Format(@"Plugins\CavaPlugin\Settings\Main-Settings.xml"));
+        //public String ProfilePath = Path.Combine(Utilities.AssemblyDirectory + @"\Default Profiles\Cava\");
 
         // Private variables for internal state
         private bool _isBehaviorDone;
@@ -92,8 +94,8 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
         {
             get
             {
-                string directory = Utilities.AssemblyDirectory + @"\Default Profiles\Cava\Scripts\";
-                return (Path.Combine(directory, ProfileName));
+                string directory = Path.Combine(Utilities.AssemblyDirectory + @"\Default Profiles\Cava\Scripts\");
+                return (Path.Combine(directory, ProfileName + ".xml"));
             }
         }
 
@@ -134,12 +136,6 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
                     new Decorator(ret => ProfileBaseToLoad == 0,
                         new Action(context =>
                         {
-                            if (!File.Exists(ProfileName))
-                            {
-                                LogMessage("fatal", "CavaPlugin error.  Download or unpack problem with file? {0}",ProfileName);
-                                _isBehaviorDone = true;
-                                return;
-                            }
                             CPGlobalSettings.Instance.Load();
                             if (CPGlobalSettings.Instance.Allowlunch)
                             {
@@ -167,7 +163,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
                     new Decorator(ret => !File.Exists(NewProfilePath),
                         new Action(delegate
                         {
-                            LogMessage("fatal", "Profile '{0}' does not exist.  Download or unpack problem with profile?", ProfileName);
+                            LogMessage("fatal", "Profile '{0}' does not exist.  Download or unpack problem with profile?", NewProfilePath);
                             _isBehaviorDone = true;
                     })),
 
@@ -180,7 +176,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
                             ProfileManager.LoadNew(NewProfilePath, false);
                             new WaitContinue(TimeSpan.FromMilliseconds(300), ret => false, new ActionAlwaysSucceed());
                             _isBehaviorDone = true;
-                    }))
+                        }))
              ));
         }
 
