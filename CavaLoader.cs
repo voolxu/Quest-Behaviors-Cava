@@ -144,14 +144,14 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
                             }
                             CPGlobalSettings.Instance.Allowlunch = false;
                             CPGlobalSettings.Instance.Save();
-                            if (ProfileBaseToLoad == 1) { ProfileName = "Next[Cava].xml"; }
-                            if (ProfileBaseToLoad == 2) { ProfileName = "[Quest]Pandaren-Horde1to90By[Cava].xml"; }
-                            if (ProfileBaseToLoad == 3) { ProfileName = "[Quest]Pandaren-Alliance1to90By[Cava].xml"; }
-                            if (ProfileBaseToLoad == 4) { ProfileName = "[Quest]MOP85to90WithLootBy[Cava].xml"; }
-                            if (ProfileBaseToLoad == 5) { ProfileName = "ArmageddonerNext[Cava].xml"; }
-                            if (ProfileBaseToLoad == 6) { ProfileName = "ArmageddonerNext[Cava].xml"; }
-                            if (ProfileBaseToLoad == 7) { ProfileName = "emptymb600.xml"; }
-                            if (ProfileBaseToLoad == 8) { ProfileName = "emptymb300.xml"; }
+                            if (ProfileBaseToLoad == 1) { ProfileName = "Next[Cava]"; }
+                            if (ProfileBaseToLoad == 2) { ProfileName = "[Quest]Pandaren-Horde1to90By[Cava]"; }
+                            if (ProfileBaseToLoad == 3) { ProfileName = "[Quest]Pandaren-Alliance1to90By[Cava]"; }
+                            if (ProfileBaseToLoad == 4) { ProfileName = "[Quest]MOP85to90WithLootBy[Cava]"; }
+                            if (ProfileBaseToLoad == 5) { ProfileName = "ArmageddonerNext[Cava]"; }
+                            if (ProfileBaseToLoad == 6) { ProfileName = "ArmageddonerNext[Cava]"; }
+                            if (ProfileBaseToLoad == 7) { ProfileName = "emptymb600"; }
+                            if (ProfileBaseToLoad == 8) { ProfileName = "emptymb300"; }
                             
                             if (ProfileBaseToLoad == 0)
                             {
