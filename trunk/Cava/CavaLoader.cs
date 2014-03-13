@@ -31,7 +31,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
             try
             {
                 ProfileBaseToLoad = GetAttributeAsNullable<int>("PBL", false, new ConstrainTo.Domain<int>(0, 100), null) ?? 0;
-                ProfileName = GetAttributeAs<string>("ProfileName", true, ConstrainAs.StringNonEmpty, new[] { "Profile" }) ?? "";
+                ProfileName = GetAttributeAs<string>("ProfileName", false, ConstrainAs.StringNonEmpty, new[] { "Profile" }) ?? "";
 
 								}
             catch (Exception except)
