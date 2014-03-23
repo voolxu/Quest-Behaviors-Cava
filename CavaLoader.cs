@@ -152,7 +152,8 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
                             if (ProfileBaseToLoad == 6) { ProfileName = "ArmageddonerNext[Cava]"; }
                             if (ProfileBaseToLoad == 7) { ProfileName = "emptymb600"; }
                             if (ProfileBaseToLoad == 8) { ProfileName = "emptymb300"; }
-                            
+														if (ProfileBaseToLoad == 10) { ProfileName = "[N-Quest]Armageddoner_Reserved[Cava]"; }
+                
                             if (ProfileBaseToLoad == 0)
                             {
                                 _isBehaviorDone = true;
