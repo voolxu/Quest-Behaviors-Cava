@@ -511,16 +511,13 @@ namespace Honorbuddy.Quest_Behaviors.SpecificQuests.Cava.ThePitOfScales
                                                 spell = "Throw";
                                             break;
                                         case WoWClass.Monk:
-                                            spell = "Chi Burst";
+                                            spell = "Provoke";
                                             break;
                                     }
                                     WoWMovement.MoveStop();
                                     Boss_Caimas[0].Target();
                                     Boss_Caimas[0].Face();
                                     SpellManager.Cast(spell);
-
-                                    QBCLog.Info("pas1");
-                                    QBCLog.Info("pass2");
                                 }
                             )),
                             //new Wait(TimeSpan.FromSeconds(30), context => false, new ActionAlwaysSucceed()),

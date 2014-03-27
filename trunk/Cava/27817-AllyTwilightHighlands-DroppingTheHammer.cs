@@ -28,7 +28,8 @@ using Styx;
 using Styx.Common;
 using Styx.CommonBot;
 using Styx.CommonBot.Profiles;
-using Styx.CommonBot.Routines;
+//using Styx.CommonBot.Routines;
+using Styx.Helpers;
 using Styx.Pathing;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
@@ -39,17 +40,17 @@ using Action = Styx.TreeSharp.Action;
 
 
 // ReSharper disable once CheckNamespace
-namespace Honorbuddy.Quest_Behaviors.Cava.ScentOfBattle
+namespace Honorbuddy.Quest_Behaviors.Cava.DroppingTheHammer
 {
-    [CustomBehaviorFileName(@"Cava\27811-AllyTwilightHighlands-ScentOfBattle")]
-    public class ScentOfBattle : CustomForcedBehavior
+    [CustomBehaviorFileName(@"Cava\27817-AllyTwilightHighlands-DroppingTheHammer")]
+    public class DroppingTheHammer : CustomForcedBehavior
     {
-        ~ScentOfBattle()
+        ~DroppingTheHammer()
         {
             Dispose(false);
         }
 
-        public ScentOfBattle(Dictionary<string, string> args)
+        public DroppingTheHammer(Dictionary<string, string> args)
             : base(args)
         {
             QBCLog.BehaviorLoggingContext = this;
@@ -59,7 +60,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.ScentOfBattle
                 // QuestRequirement* attributes are explained here...
                 //    http://www.thebuddyforum.com/mediawiki/index.php?title=Honorbuddy_Programming_Cookbook:_QuestId_for_Custom_Behaviors
                 // ...and also used for IsDone processing.
-                QuestId = 27811;
+                QuestId = 27817;
                 QuestRequirementComplete = QuestCompleteRequirement.NotComplete;
                 QuestRequirementInLog = QuestInLogRequirement.InLog;
                 MobIds = new uint[] { 50635, 50638, 50643, 50636 };
@@ -116,7 +117,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.ScentOfBattle
                 TreeRoot.StatusText = string.Empty;
 
                 // Call parent Dispose() (if it exists) here ...
-// ReSharper disable once CSharpWarnings::CS0618
+                // ReSharper disable once CSharpWarnings::CS0618
                 base.Dispose();
             }
 
@@ -127,13 +128,16 @@ namespace Honorbuddy.Quest_Behaviors.Cava.ScentOfBattle
 
         #region Overrides of CustomForcedBehavior
 
+
+
+
         public Composite DoneYet
         {
             get
             {
                 return new Decorator(ret => Me.IsQuestComplete(QuestId),
                     new Action(delegate
-                    {                                                       
+                    {
                         TreeRoot.StatusText = "Finished!";
                         _isBehaviorDone = true;
                         return RunStatus.Success;
@@ -143,35 +147,31 @@ namespace Honorbuddy.Quest_Behaviors.Cava.ScentOfBattle
 
         public WoWUnit Normal
         {
-            get { return ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.Entry == 46968 && u.IsAlive && !u.IsMoving).OrderBy(u => u.Distance).FirstOrDefault(); }
+            get { return ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.Entry == 47199 && u.IsAlive).OrderBy(u => u.Distance).FirstOrDefault(); }
         }
 
-        public WoWUnit Pinned
+        public WoWUnit Boss
         {
-            get { return ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.Entry == 46969 && u.IsAlive && u.HasAura(87490)).OrderBy(u => u.Distance).FirstOrDefault(); }
+            get { return ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.Entry == 46839 && u.IsAlive).OrderBy(u => u.Distance).FirstOrDefault(); }
         }
 
-        public WoWUnit Pin
+         public WoWUnit Mount
         {
-            get
-            {
-                return ObjectManager.GetObjectsOfType<WoWUnit>().FirstOrDefault(p => p.IsAlive && p.Entry == 46975 && p.Location.Distance(Pinned.Location) <= (20));
-
-            }
+            get { return ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.Entry == 47315 && u.IsAlive && u.CharmedByUnit == Me).OrderBy(u => u.Distance).FirstOrDefault(); }
         }
 
-        private Composite TryCast(int spellId, ProvideBoolDelegate requirements = null)
+        private static Composite TryCast(int spellId, ProvideBoolDelegate requirements = null)
         {
-            requirements = requirements ?? (context => true);
+             requirements = requirements ?? (context => true);
 
-            return new Decorator(context => SpellManager.CanCast(spellId) && requirements(context),
-                new Action(context =>
-                {
-                    QBCLog.DeveloperInfo("MiniCombatRoutine used {0}", Utility.GetSpellNameFromId(spellId));
-                    SpellManager.Cast(spellId);
-                }));
+             return new Decorator(context => SpellManager.CanCast(spellId) && requirements(context),
+                 new Action(context =>
+                 {
+                     QBCLog.DeveloperInfo("MiniCombatRoutine used {0}", Utility.GetSpellNameFromId(spellId));
+                     SpellManager.Cast(spellId);
+                 }));
         }
-
+         
         public Composite DoDps
         {
             get
@@ -180,20 +180,19 @@ namespace Honorbuddy.Quest_Behaviors.Cava.ScentOfBattle
                     new PrioritySelector(
                         new Decorator(ret => Me.Combat && Me.Mounted,
                             new Sequence(
-                                new Action(ret =>WoWMovement.MoveStop()),
-                                new Action(ret =>Lua.DoString("Dismount()")),
+                                new Action(ret => WoWMovement.MoveStop()),
+                                new Action(ret => Lua.DoString("Dismount()")),
                                 new Decorator(ret => Me.Class == WoWClass.Druid,
-                                    new Action(ret => Lua.DoString("RunMacroText('/cancelaura Flight Form')"))),
-                                new Action(ret =>Mount.Dismount())
+                                    new Action(ret => Lua.DoString("RunMacroText('/cancelaura Flight Form')")))
                         )),
-                        //new Decorator(ret => RoutineManager.Current.CombatBehavior != null, RoutineManager.Current.CombatBehavior),
-                        //new Action(c => RoutineManager.Current.Combat()),
+                    //new Decorator(ret => RoutineManager.Current.CombatBehavior != null, RoutineManager.Current.CombatBehavior),
+                    //new Action(c => RoutineManager.Current.Combat()),
                         new Decorator(ret => Me.CurrentTarget != null && Me.CurrentTarget.IsDead,
                             new Sequence(
                                 new Action(ret => Blacklist.Add(Me.CurrentTarget, BlacklistFlags.Combat, TimeSpan.FromSeconds(180000))),
                                 new Action(ret => Me.ClearTarget())
                         )),
-                        new Decorator(ret => Me.CurrentTarget != null && Me.CurrentTarget.Location.Distance(Me.Location) > 4,
+                        new Decorator(ret => Me.CurrentTarget != null && Me.CurrentTarget.Location.Distance(Me.Location) > 4 && !(Me.CurrentTarget.IsCasting && Me.CurrentTarget.CastingSpellId == 88207),
                             new Action(c => Navigator.MoveTo(Me.CurrentTarget.Location))),
                         new Decorator(ret => !Me.IsAutoAttacking,
                             new Action(c => Lua.DoString("StartAttack()"))),
@@ -266,85 +265,61 @@ namespace Honorbuddy.Quest_Behaviors.Cava.ScentOfBattle
             }
         }
 
-        public Composite GetInRange
+
+        public Composite PartOne
         {
             get
             {
-                return new Decorator(r => Normal.Distance > 1, new Action(r=>Flightor.MoveTo(Normal.Location)));
+                return new Decorator(r=>!Me.IsQuestObjectiveComplete(QuestId, 1),
+                    new PrioritySelector(
+                        new Decorator(r => Me.CurrentTarget == null || Me.CurrentTarget.Distance > 55,
+                            new Action(r=>Normal.Target())),
+                        new Decorator(r => Me.CurrentTarget != null && Me.CurrentTarget.Distance <= 55,
+                            new Action(r=>Hammer()))));
             }
         }
-        public Composite GetInRangep
+
+        public Composite PartTwo
         {
             get
             {
-                return new Decorator(r => Pinned.Distance > 1, new Action(r => Flightor.MoveTo(Pinned.Location)));
+                return new Decorator(r => !Me.IsQuestObjectiveComplete(QuestId, 2),
+                    new PrioritySelector(
+                    new Decorator(r => Me.IsOnTransport && Me.CurrentTarget == null || Me.CurrentTarget.Distance > 55,
+                        new Action(r => Boss.Target())),
+                    new Decorator(r => Me.IsOnTransport && Me.CurrentTarget != null && Me.CurrentTarget.Distance <= 55,
+                        new Action(r => Hammer())),
+                    new Decorator(r => !Me.IsOnTransport && Me.CurrentTarget != null && (Me.CurrentTarget.IsCasting) && Me.CurrentTarget.CastingSpellId == 88207 && Me.CurrentTarget.Distance < 10,
+                        new Action(r =>
+                        {
+                            var moveTo = WoWMathHelper.CalculatePointFrom(StyxWoW.Me.Location, StyxWoW.Me.CurrentTarget.Location, 10f);
+
+                            if (Navigator.CanNavigateFully(StyxWoW.Me.Location, moveTo))
+                            {
+                                Navigator.MoveTo(moveTo);
+                                return RunStatus.Success;
+                            }
+
+                            return RunStatus.Failure;
+                        })),
+                        new Decorator(r => !Me.IsOnTransport && Me.Combat,
+                            DoDps)));
             }
         }
 
-        public Composite Interact
+        public void Hammer()
         {
-            get
-            {
-                return new Decorator(r => Normal.Distance <= 1, new Action(delegate
-                    {
-                        Normal.Interact();
-                        Lua.DoString("SelectGossipOption(1);");
-                }));
-            }
+            Lua.DoString("CastPetAction(1);");
         }
 
-
-
-        public Composite NormalGryphon
+        public void Shield()
         {
-            get 
-            {
-                return new Decorator(r => Normal != null && !Me.Combat, new PrioritySelector(GetInRange, Interact));
-            }
+            Lua.DoString("CastPetAction(2);");
         }
-
-
-        public Composite KillPegs
-        {
-            get
-            {
-                return new Decorator(r => Pin != null && !Me.Combat, new Action(delegate
-                    {
-                        Pin.Target();
-                        Pin.Interact();
-                }));
-            }
-        }
-
-
-        public Composite PinnedGryphon
-        {
-            get
-            {
-                return new Decorator(r => Pinned != null && !Me.Combat, new PrioritySelector(GetInRangep, KillPegs));
-            }
-        }
-
-
-        public Composite Combat
-        {
-            get
-            {
-                return new Decorator(r => Me.Combat,DoDps);
-            }
-        }
-
 
         protected Composite CreateBehavior_QuestbotMain()
         {
-            return _root ?? (_root = new Decorator(ret => !_isBehaviorDone,
-                new PrioritySelector(
-                    DoneYet,
-                    Combat,
-                    NormalGryphon,
-                    PinnedGryphon,
-                    new ActionAlwaysSucceed()
-            )));
+            return _root ?? (_root = new Decorator(ret => !_isBehaviorDone, new Sequence(new DecoratorContinue(r=> Mount != null  && (Mount.GetAllAuras().FirstOrDefault(x=>x.SpellId == 88043 || x.SpellId ==88189) != null),new Action(r=>Shield())),new PrioritySelector(DoneYet, PartOne, PartTwo, new ActionAlwaysSucceed()))));
         }
 
 
@@ -365,7 +340,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.ScentOfBattle
             }
         }
 
-        
+
         public override void OnStart()
         {
             // This reports problems, and stops BT processing if there was a problem with attributes...
@@ -378,6 +353,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.ScentOfBattle
             if (!IsDone)
             {
                 TreeHooks.Instance.InsertHook("Questbot_Main", 0, CreateBehavior_QuestbotMain());
+
                 this.UpdateGoalText(QuestId);
             }
         }
