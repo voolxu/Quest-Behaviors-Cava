@@ -245,7 +245,7 @@ namespace Honorbuddy.Quest_Behaviors.SpecificQuests.Cava.TheDefilersRitual
                         spell = "Throw";
                     break;
                 case WoWClass.Monk:
-                    spell = "Chi Burst";
+                    spell = "Provoke";
                     break;
             }
 
