@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
+//using System.Globalization;
+//using System.Diagnostics;
 using System.Linq;
-using System.Threading;
+//using System.Threading;
 
 using Styx;
 using Styx.CommonBot;
@@ -22,6 +23,7 @@ using Action = Styx.TreeSharp.Action;
 	*/
 
 
+// ReSharper disable once CheckNamespace
 namespace Honorbuddy.Quest_Behaviors.Cava.KillTheThaneofVoldrune
 {
     [CustomBehaviorFileName(@"Cava\KillTheThaneofVoldrune")]
@@ -32,7 +34,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.KillTheThaneofVoldrune
         {
             try
             {
-                QuestId = GetAttributeAsNullable<int>("QuestId", false, ConstrainAs.QuestId(this), null) ?? 0; Location = WoWPoint.Empty;
+                QuestId = GetAttributeAsNullable("QuestId", false, ConstrainAs.QuestId(this), null) ?? 0; Location = WoWPoint.Empty;
                 Endloc = WoWPoint.Empty;
                 QuestRequirementComplete = QuestCompleteRequirement.NotComplete;
                 QuestRequirementInLog = QuestInLogRequirement.InLog;
@@ -56,14 +58,14 @@ namespace Honorbuddy.Quest_Behaviors.Cava.KillTheThaneofVoldrune
         public int QuestId { get; private set; }
 		public QuestCompleteRequirement QuestRequirementComplete { get; private set; }
         public QuestInLogRequirement    QuestRequirementInLog { get; private set; }
-        public static LocalPlayer me = StyxWoW.Me;
+        public static LocalPlayer Me = StyxWoW.Me;
         static public bool InVehicle { get { return Lua.GetReturnVal<int>("if IsPossessBarVisible() or UnitInVehicle('player') or not(GetBonusBarOffset()==0) then return 1 else return 0 end", 0) == 1; } }
-		WoWPoint endloc = new WoWPoint(2798.203, -2510.08, 99.77123);
-        WoWPoint startloc = new WoWPoint(2956.376, -2538.126, 129.1578);
-        WoWPoint flyloc = new WoWPoint(2788.155, -2508.851, 56.05595);
+        readonly WoWPoint _endloc = new WoWPoint(2918.578, -2560.254, 116.1465);
+        readonly WoWPoint _startloc = new WoWPoint(2956.376, -2538.126, 129.1578);
+        readonly WoWPoint _flyloc = new WoWPoint(2788.155, -2508.851, 56.05595);
 
         #region Overrides of CustomForcedBehavior
-		public List<WoWUnit> objmob
+		public List<WoWUnit> Objmob
         {
             get
             {
@@ -72,7 +74,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.KillTheThaneofVoldrune
                                     .OrderBy(u => u.Distance).ToList();
             }
         }
-		public List<WoWUnit> flylist
+		public List<WoWUnit> Flylist
         {
             get
             {
@@ -86,9 +88,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.KillTheThaneofVoldrune
         {
             return _root ?? (_root =
                 new PrioritySelector(
-
-
-                    new Decorator(ret => me.QuestLog.GetQuestById((uint)QuestId) != null && me.QuestLog.GetQuestById((uint)QuestId).IsCompleted,
+                    new Decorator(ret => Me.QuestLog.GetQuestById((uint)QuestId) != null && Me.QuestLog.GetQuestById((uint)QuestId).IsCompleted,
 						new Sequence(
                             new Action(ret => TreeRoot.StatusText = "Finished!"),
                             new WaitContinue(120,
@@ -96,27 +96,27 @@ namespace Honorbuddy.Quest_Behaviors.Cava.KillTheThaneofVoldrune
                             {
                                 _isDone = true;
                                 return RunStatus.Success;
-                            })))),
-					new Decorator(ret => !InVehicle,
-						new Action(ret =>
+                    })))),
+                     new Decorator(ret => !InVehicle,
+                         new Action(ret =>
 						{
-							if (flylist.Count == 0)
+							if (Flylist.Count == 0)
 							{
-								Navigator.MoveTo(flyloc);
-                                Thread.Sleep(1000);
+								Navigator.MoveTo(_flyloc);
+                                StyxWoW.Sleep(1000);
 							}
-							if (flylist.Count > 0 && flylist[0].Location.Distance(me.Location) > 5)
+							if (Flylist.Count > 0 && Flylist[0].Location.Distance(Me.Location) > 5)
 							{
-								Navigator.MoveTo(flylist[0].Location);
-                                Thread.Sleep(1000);
+								Navigator.MoveTo(Flylist[0].Location);
+                                StyxWoW.Sleep(1000);
 							}
-							if (flylist.Count > 0 && flylist[0].Location.Distance(me.Location) <= 5)
+							if (Flylist.Count > 0 && Flylist[0].Location.Distance(Me.Location) <= 5)
 							{
 								WoWMovement.MoveStop();
-								flylist[0].Interact();
-                                Thread.Sleep(1000);
+								Flylist[0].Interact();
+                                StyxWoW.Sleep(1000);
 								Lua.DoString("SelectGossipOption(1)");
-                                Thread.Sleep(1000);
+                                StyxWoW.Sleep(1000);
 							}
 						})),
 					new Decorator(ret => InVehicle,
@@ -124,51 +124,51 @@ namespace Honorbuddy.Quest_Behaviors.Cava.KillTheThaneofVoldrune
 						{
                             if (!InVehicle)
                                 return RunStatus.Success;
-                            if (me.QuestLog.GetQuestById((uint)QuestId).IsCompleted)
+                            if (Me.QuestLog.GetQuestById((uint)QuestId).IsCompleted)
                             {
-                                while (me.Location.Distance(endloc) > 10)
+                                if (Me.Location.Distance(_endloc) > 10)
                                 {
-                                    WoWMovement.ClickToMove(endloc);
-                                    Thread.Sleep(1000);
+                                    WoWMovement.ClickToMove(_endloc);
+                                    StyxWoW.Sleep(1000);
                                 }
                                 Lua.DoString("VehicleExit()");
                                 return RunStatus.Success;
                             }
-                            if (objmob.Count == 0)
+                            if (Objmob.Count == 0)
                             {
-                                WoWMovement.ClickToMove(startloc);
-                                Thread.Sleep(1000);
+                                WoWMovement.ClickToMove(_startloc);
+                                StyxWoW.Sleep(1000);
                             }
-                            if (objmob.Count > 0 && (objmob[0].Location.Distance(me.Location) > 50 || !objmob[0].InLineOfSight))
+                            if (Objmob.Count > 0 && (Objmob[0].Location.Distance(Me.Location) > 50 || !Objmob[0].InLineOfSight))
                             {
-                                objmob[0].Target();
-                                WoWMovement.ClickToMove(startloc);
-                                Thread.Sleep(1000);
+                                Objmob[0].Target();
+                                WoWMovement.ClickToMove(_startloc);
+                                StyxWoW.Sleep(1000);
                             }
-                            if (objmob.Count > 0 && objmob[0].Location.Distance(me.Location) > 20 && objmob[0].Location.Distance(me.Location) <= 50 && objmob[0].InLineOfSight)
+                            if (Objmob.Count > 0 && Objmob[0].Location.Distance(Me.Location) > 20 && Objmob[0].Location.Distance(Me.Location) <= 50 && Objmob[0].InLineOfSight)
                             {
-                                objmob[0].Target();
-                                objmob[0].Face();
-                                WoWMovement.ClickToMove(objmob[0].Location);
+                                Objmob[0].Target();
+                                Objmob[0].Face();
+                                WoWMovement.ClickToMove(Objmob[0].Location);
                                 Lua.DoString("RunMacroText('/click OverrideActionBarButton1','0')");
-                                Thread.Sleep(500);
+                                StyxWoW.Sleep(500);
                                 Lua.DoString("RunMacroText('/click OverrideActionBarButton2','0')");
-                                Thread.Sleep(500);
+                                StyxWoW.Sleep(500);
                                 Lua.DoString("RunMacroText('/click OverrideActionBarButton3','0')");
-                                Thread.Sleep(500);
+                                StyxWoW.Sleep(500);
                             }
-                            if (objmob.Count > 0 && objmob[0].Location.Distance(me.Location) <= 20 && objmob[0].InLineOfSight)
+                            if (Objmob.Count > 0 && Objmob[0].Location.Distance(Me.Location) <= 20 && Objmob[0].InLineOfSight)
                             {
                                 WoWMovement.Move(WoWMovement.MovementDirection.Backwards);
                                 WoWMovement.MoveStop(WoWMovement.MovementDirection.Backwards);
-                                objmob[0].Target();
-                                objmob[0].Face();
+                                Objmob[0].Target();
+                                Objmob[0].Face();
                                 Lua.DoString("RunMacroText('/click OverrideActionBarButton1','0')");
-                                Thread.Sleep(500);
+                                StyxWoW.Sleep(500);
                                 Lua.DoString("RunMacroText('/click OverrideActionBarButton2','0')");
-                                Thread.Sleep(500);
+                                StyxWoW.Sleep(500);
                                 Lua.DoString("RunMacroText('/click OverrideActionBarButton3','0')");
-                                Thread.Sleep(500);
+                                StyxWoW.Sleep(500);
                             }
 							return RunStatus.Running;
 						}
@@ -183,5 +183,6 @@ namespace Honorbuddy.Quest_Behaviors.Cava.KillTheThaneofVoldrune
         }
 
         #endregion
+
     }
 }
