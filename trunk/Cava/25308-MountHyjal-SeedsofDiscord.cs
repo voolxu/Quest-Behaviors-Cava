@@ -154,8 +154,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.SeedsofDiscord
                             new DecoratorContinue(ret => _outHouseLoc.Distance(Me.Location)  <= 2,
                                 new Sequence(
                                     new Action(ret => WoWMovement.MoveStop()),
-                                    new Decorator(ret => Me.IsShapeshifted(),
-                                        new Action(ret => Lua.DoString("CancelShapeshiftForm()"))),
+                                    new Action(ret => Lua.DoString("CancelShapeshiftForm()")),
                                     new Action(ret => ItemOgreDisguise.Use()),
                                     new Sleep(1000)
                     )))),
