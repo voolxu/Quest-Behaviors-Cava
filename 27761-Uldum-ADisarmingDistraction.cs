@@ -219,7 +219,8 @@ namespace Honorbuddy.Quest_Behaviors.Cava.ADisarmingDistraction
         {
             get
             {
-                return new Action(delegate { 
+                return new Action(delegate {
+										Lua.DoString("Dismount()");								
                     ClosestBomb().Interact();
                     WoWMovement.MoveStop();
                     Lua.DoString("RunMacroText('/run for i=1,  GetNumCompanions('MOUNT') do local flags = select(6, GetCompanionInfo('MOUNT', i)); if bit.band(flags, 0x2) ~= 0 then CallCompanion('MOUNT',i) return 1 end end return nil','0')");
