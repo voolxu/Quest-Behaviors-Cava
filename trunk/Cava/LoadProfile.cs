@@ -147,7 +147,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
             [Setting, DefaultValue(0)]
             public int Language { get; set; }
             [Setting, DefaultValue(false)]
-			public bool languageselected { get; set; }
+			public bool Languageselected { get; set; }
 			[Setting, DefaultValue("")]
 			public string CpLogin { get; set; }
 			[Setting, DefaultValue("")]
