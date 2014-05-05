@@ -254,7 +254,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                             }
                             if (ProfileBaseToLoad == 4)
                             {
-                                ProfileName = "[Quest]MOP85to90WithLootBy[Cava].xml";
+                                ProfileName = "[Quest]MOP88to90WithLootBy[Cava].xml";
                             }
                             if (ProfileBaseToLoad == 5)
                             {
