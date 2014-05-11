@@ -1,25 +1,26 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+//using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Threading;
+//using System.Linq;
+//using System.Threading;
 
 using CommonBehaviors.Actions;
-using Styx;
+//using Styx;
 using Styx.Common;
 using Styx.CommonBot;
 using Styx.CommonBot.Profiles;
-using Styx.CommonBot.Routines;
+//using Styx.CommonBot.Routines;
 using Styx.Helpers;
-using Styx.Pathing;
-using Styx.Plugins;
+//using Styx.Pathing;
+//using Styx.Plugins;
 using Styx.TreeSharp;
-using Styx.WoWInternals;
-using Styx.WoWInternals.WoWObjects;
+//using Styx.WoWInternals;
+//using Styx.WoWInternals.WoWObjects;
 
 using Action = Styx.TreeSharp.Action;
 
+// ReSharper disable once CheckNamespace
 namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
 {
     [CustomBehaviorFileName(@"Cava\CavaLoader")]
@@ -30,8 +31,8 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
         {
             try
             {
-                ProfileBaseToLoad = GetAttributeAsNullable<int>("PBL", false, new ConstrainTo.Domain<int>(0, 100), null) ?? 0;
-                ProfileName = GetAttributeAs<string>("ProfileName", false, ConstrainAs.StringNonEmpty, new[] { "Profile" }) ?? "";
+                ProfileBaseToLoad = GetAttributeAsNullable("PBL", false, new ConstrainTo.Domain<int>(0, 100), null) ?? 0;
+                ProfileName = GetAttributeAs("ProfileName", false, ConstrainAs.StringNonEmpty, new[] { "Profile" }) ?? "";
 
 								}
             catch (Exception except)
@@ -80,6 +81,10 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
         public bool ArmaPanelBack { get; set; }
         [Setting, DefaultValue(false)]
         public bool ProfMinBlack600 { get; set; }
+        [Setting, DefaultValue(1)]
+        public int UseServer { get; set; }
+        [Setting, DefaultValue(true)]
+        public bool DisablePlugin { get; set; }
         }
         
         // Attributes provided by caller
@@ -94,7 +99,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
         {
             get
             {
-                string directory = Path.Combine(Utilities.AssemblyDirectory + @"\Default Profiles\Cava\Scripts\");
+                var directory = Path.Combine(Utilities.AssemblyDirectory + @"\Default Profiles\Cava\Scripts\");
                 return (Path.Combine(directory, ProfileName + ".xml"));
             }
         }
