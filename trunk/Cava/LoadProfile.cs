@@ -35,18 +35,18 @@ using System.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+//using System.Linq;
 using System.Xml.Linq;
 
 using Bots.Quest;
 using CommonBehaviors.Actions;
 using Honorbuddy.QuestBehaviorCore;
-using Styx;
+//using Styx;
 using Styx.Common;
 using Styx.CommonBot;
 using Styx.CommonBot.Profiles;
 using Styx.TreeSharp;
-using Styx.WoWInternals.WoWObjects;
+//using Styx.WoWInternals.WoWObjects;
 using Action = Styx.TreeSharp.Action;
 using Styx.Helpers;
 //using DefaultValue = Styx.Helpers.DefaultValueAttribute;
@@ -74,9 +74,9 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                 // QuestRequirement* attributes are explained here...
                 //    http://www.thebuddyforum.com/mediawiki/index.php?title=Honorbuddy_Programming_Cookbook:_QuestId_for_Custom_Behaviors
                 // ...and also used for IsDone processing.
-                ProfileName = GetAttributeAs<string>("ProfileName", true, ConstrainAs.StringNonEmpty, new[] { "Profile" }) ?? "";
+                ProfileName = GetAttributeAs("ProfileName", true, ConstrainAs.StringNonEmpty, new[] { "Profile" }) ?? "";
                 RememberProfile = GetAttributeAsNullable<bool>("RememberProfile", false, null, null) ?? false;
-                ProfileBaseToLoad = GetAttributeAsNullable<int>("PBL", false, new ConstrainTo.Domain<int>(-1, 10000), null) ?? 0;
+                ProfileBaseToLoad = GetAttributeAsNullable("PBL", false, new ConstrainTo.Domain<int>(-1, 10000), null) ?? 0;
 
                 if (ProfileBaseToLoad >0 && !ProfileName.ToLower().EndsWith(".xml"))
                     { ProfileName += ".xml"; }
@@ -104,7 +104,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
         // private Composite           _root;
 
         // Private properties
-        private String CurrentProfile { get { return (ProfileManager.XmlLocation); } }
+        //private String CurrentProfile { get { return (ProfileManager.XmlLocation); } }
         private String NewProfilePath
         {
             get
@@ -115,7 +115,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
         }
         //private String NewProfilePath { get; set; }
         public int ProfileBaseToLoad { get; private set; }
-        private string profilebased = "";
+        //private string profilebased = "";
 
         // DON'T EDIT THESE--they are auto-populated by Subversion
         public override string SubversionId { get { return ("$Id: LoadProfile.cs 1085 2013-11-30 10:44:50Z Dogan $"); } }
@@ -158,7 +158,11 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
 			public bool ArmaPanelBack { get; set; }
 			[Setting, DefaultValue(false)]
 			public bool ProfMinBlack600 { get; set; }
-		}
+            [Setting, DefaultValue(1)]
+            public int UseServer { get; set; }
+            [Setting, DefaultValue(true)]
+            public bool DisablePlugin { get; set; }
+        }
 
         ~LoadProfile()
         {
@@ -184,6 +188,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                 TreeRoot.StatusText = string.Empty;
 
                 // Call parent Dispose() (if it exists) here ...
+                // ReSharper disable once CSharpWarnings::CS0618
                 base.Dispose();
             }
 
@@ -276,7 +281,6 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                             if (ProfileBaseToLoad == 0)
                             {
                                 _isBehaviorDone = true;
-                                return;
                             }
 
                         }
@@ -299,43 +303,97 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                     {
                         if (NewProfilePath.Contains("armageddoner"))
                         {
-                            TreeRoot.StatusText = "Loading profile '" + ProfileName + "'";
-                            HttpWebRequest request;
-                            HttpWebResponse response;
-                            CookieContainer cookies;
-                            string url = string.Format("http://cavaprofiles.org/index.php?user={0}&passw={1}", CPGlobalSettings.Instance.CpLogin, Decrypt(CPGlobalSettings.Instance.CpPassword));
-                            request = (HttpWebRequest)WebRequest.Create(url);
-                            request.AllowAutoRedirect = false;
-                            request.CookieContainer = new CookieContainer();
-                            response = (HttpWebResponse)request.GetResponse();
-                            cookies = request.CookieContainer;
-                            response.Close();
-                            try
+                            if (CPGlobalSettings.Instance.UseServer == 1)
                             {
-                                request = (HttpWebRequest) WebRequest.Create("http://cavaprofiles.org/index.php/profiles/profiles-list/armageddoner/" + ProfileName + "/file");
+                                TreeRoot.StatusText = "Loading profile '" + ProfileName + "'";
+                                var url = string.Format("http://cavaprofiles.org/index.php?user={0}&passw={1}",
+                                    CPGlobalSettings.Instance.CpLogin, Decrypt(CPGlobalSettings.Instance.CpPassword));
+                                var request = (HttpWebRequest) WebRequest.Create(url);
                                 request.AllowAutoRedirect = false;
-                                request.CookieContainer = cookies;
-                                response = (HttpWebResponse) request.GetResponse();
-                                Stream data = response.GetResponseStream();
-                                string html = String.Empty;
-                                using (StreamReader sr = new StreamReader(data))
-                                {
-                                    html = sr.ReadToEnd();
-                                }
+                                request.CookieContainer = new CookieContainer();
+                                var response = (HttpWebResponse) request.GetResponse();
+                                var cookies = request.CookieContainer;
                                 response.Close();
-                                var reader = new StreamReader(new MemoryStream(Convert.FromBase64String(html)));
-                                XElement xml = XElement.Parse(reader.ReadToEnd());
-                                var Profile = new Profile(xml, null);
-                                QuestState.Instance.Order.CurrentBehavior = null;
-                                QuestState.Instance.Order.Nodes.InsertRange(0, Profile.QuestOrder);
-                                QuestState.Instance.Order.UpdateNodes();
-																using (var ms = new MemoryStream(Convert.FromBase64String(html)))
-																ProfileManager.LoadNew(ms);			
+                                try
+                                {
+                                    request =
+                                        (HttpWebRequest)
+                                            WebRequest.Create(
+                                                "http://cavaprofiles.org/index.php/profiles/profiles-list/armageddoner/" +
+                                                ProfileName + "/file");
+                                    request.AllowAutoRedirect = false;
+                                    request.CookieContainer = cookies;
+                                    response = (HttpWebResponse) request.GetResponse();
+                                    var data = response.GetResponseStream();
+                                    var html = String.Empty;
+                                    if (data != null)
+                                        using (var sr = new StreamReader(data))
+                                        {
+                                            html = sr.ReadToEnd();
+                                        }
+                                    response.Close();
+                                    var reader = new StreamReader(new MemoryStream(Convert.FromBase64String(html)));
+                                    var xml = XElement.Parse(reader.ReadToEnd());
+                                    var profile = new Profile(xml, null);
+                                    QuestState.Instance.Order.CurrentBehavior = null;
+                                    QuestState.Instance.Order.Nodes.InsertRange(0, profile.QuestOrder);
+                                    QuestState.Instance.Order.UpdateNodes();
+                                    using (var ms = new MemoryStream(Convert.FromBase64String(html)))
+                                        ProfileManager.LoadNew(ms);
+                                }
+                                catch (Exception)
+                                {
+                                    QBCLog.Fatal(
+                                        "Does not have access to Profile '{0}'. Please check if you have Armageddoner access",
+                                        ProfileName);
+                                    _isBehaviorDone = true;
+                                }
                             }
-                            catch (Exception ex)
+                            else
                             {
-                                QBCLog.Fatal("Does not have access to Profile '{0}'. Please check if you have Armageddoner access", ProfileName);
-                                _isBehaviorDone = true;
+                                TreeRoot.StatusText = "Loading profile '" + ProfileName + "'";
+                                var url = string.Format("http://cavaprofiles.net/index.php?user={0}&passw={1}",
+                                    CPGlobalSettings.Instance.CpLogin, Decrypt(CPGlobalSettings.Instance.CpPassword));
+                                var request = (HttpWebRequest)WebRequest.Create(url);
+                                request.AllowAutoRedirect = false;
+                                request.CookieContainer = new CookieContainer();
+                                var response = (HttpWebResponse)request.GetResponse();
+                                var cookies = request.CookieContainer;
+                                response.Close();
+                                try
+                                {
+                                    request =
+                                        (HttpWebRequest)
+                                            WebRequest.Create(
+                                                "http://cavaprofiles.net/index.php/profiles/profiles-list/armageddoner/" +
+                                                ProfileName + "/file");
+                                    request.AllowAutoRedirect = false;
+                                    request.CookieContainer = cookies;
+                                    response = (HttpWebResponse)request.GetResponse();
+                                    var data = response.GetResponseStream();
+                                    var html = String.Empty;
+                                    if (data != null)
+                                        using (var sr = new StreamReader(data))
+                                        {
+                                            html = sr.ReadToEnd();
+                                        }
+                                    response.Close();
+                                    var reader = new StreamReader(new MemoryStream(Convert.FromBase64String(html)));
+                                    var xml = XElement.Parse(reader.ReadToEnd());
+                                    var profile = new Profile(xml, null);
+                                    QuestState.Instance.Order.CurrentBehavior = null;
+                                    QuestState.Instance.Order.Nodes.InsertRange(0, profile.QuestOrder);
+                                    QuestState.Instance.Order.UpdateNodes();
+                                    using (var ms = new MemoryStream(Convert.FromBase64String(html)))
+                                        ProfileManager.LoadNew(ms);
+                                }
+                                catch (Exception)
+                                {
+                                    QBCLog.Fatal(
+                                        "Does not have access to Profile '{0}'. Please check if you have Armageddoner access",
+                                        ProfileName);
+                                    _isBehaviorDone = true;
+                                }
                             }
                         }
                         else
@@ -354,6 +412,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
         }
 
 
+        // ReSharper disable once CSharpWarnings::CS0672
         public override void Dispose()
         {
             Dispose(true);
