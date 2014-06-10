@@ -49,7 +49,7 @@
 #region Usings
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+//using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
@@ -57,18 +57,19 @@ using Styx;
 using Styx.Common.Helpers;
 using Styx.CommonBot;
 using Styx.CommonBot.Profiles;
-using Styx.CommonBot.Routines;
-using Styx.Helpers;
+//using Styx.CommonBot.Routines;
+//using Styx.Helpers;
 using Styx.Pathing;
-using Styx.Plugins;
+//using Styx.Plugins;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
-using CommonBehaviors.Actions;
+//using CommonBehaviors.Actions;
 
 using Action = Styx.TreeSharp.Action;
 #endregion
 
+// ReSharper disable once CheckNamespace
 namespace Honorbuddy.Quest_Behaviors.Cava.GoSavedInn
 {
     [CustomBehaviorFileName(@"Cava\GoSavedInn")]
@@ -84,12 +85,12 @@ namespace Honorbuddy.Quest_Behaviors.Cava.GoSavedInn
                 //    http://www.thebuddyforum.com/mediawiki/index.php?title=Honorbuddy_Programming_Cookbook:_QuestId_for_Custom_Behaviors
                 // ...and also used for IsDone processing.
   
-                QuestId = GetAttributeAsNullable<int>("QuestId", false, ConstrainAs.QuestId(this), null) ?? 0;
-                BindPointAreaId = GetAttributeAsNullable<int>("BindPointAreaId", true, ConstrainAs.ItemId, null) ?? 0;
+                QuestId = GetAttributeAsNullable("QuestId", false, ConstrainAs.QuestId(this), null) ?? 0;
+                BindPointAreaId = GetAttributeAsNullable("BindPointAreaId", true, ConstrainAs.ItemId, null) ?? 0;
                 ForceTheUse = GetAttributeAsNullable<bool>("ForceTheUse", false, null, null) ?? false;
                 ShowBindPoint = GetAttributeAsNullable<bool>("ShowBindPoint", false, null, null) ?? false;
-                WaitTime = GetAttributeAsNullable<int>("WaitTime", false, ConstrainAs.Milliseconds, null) ?? 12000;
-                Location = GetAttributeAsNullable<WoWPoint>("", false, ConstrainAs.WoWPointNonEmpty, null) ?? WoWPoint.Empty;
+                WaitTime = GetAttributeAsNullable("WaitTime", false, ConstrainAs.Milliseconds, null) ?? 12000;
+                Location = GetAttributeAsNullable("", false, ConstrainAs.WoWPointNonEmpty, null) ?? WoWPoint.Empty;
                 if (!ShowBindPoint && BindPointAreaId <= 0)
                 // Semantic coherency / covariant dependency checks --
                 {
@@ -114,8 +115,8 @@ namespace Honorbuddy.Quest_Behaviors.Cava.GoSavedInn
 
         // Attributes provided by caller
         public int QuestId { get; private set; }
-        public QuestCompleteRequirement QuestRequirementComplete { get; private set; }
-        public QuestInLogRequirement QuestRequirementInLog { get; private set; }
+        public QuestCompleteRequirement QuestRequirementComplete { get; set; }
+        public QuestInLogRequirement QuestRequirementInLog { get; set; }
         public int BindPointAreaId { get; private set; }
         public bool ForceTheUse { get; private set; }
         public bool ShowBindPoint { get; private set; }
@@ -161,6 +162,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.GoSavedInn
                 TreeRoot.StatusText = string.Empty;
 
                 // Call parent Dispose() (if it exists) here ...
+                // ReSharper disable once CSharpWarnings::CS0618
                 base.Dispose();
             }
 
@@ -226,6 +228,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.GoSavedInn
                 new Decorator(ret => ItemId.Cooldown == 0,
                     new Sequence(
                         new Action(ret => TreeRoot.StatusText = "Using Hearthstone"),
+                        new Action(ret => Mount.Dismount()), 
                         new Action(ret => ItemId.UseContainerItem()),
                         new Action(ret => StyxWoW.SleepForLagDuration()),
                         new DecoratorContinue( ret => !Me.Combat,
