@@ -1,53 +1,59 @@
-// Behavior originally contributed by mastahg.
+// Behavior originally contributed by mastahg / rework by chinajade
 //
-// DOCUMENTATION:
-//     
+// LICENSE:
+// This work is licensed under the
+//     Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
+// also known as CC-BY-NC-SA.  To view a copy of this license, visit
+//      http://creativecommons.org/licenses/by-nc-sa/3.0/
+// or send a letter to
+//      Creative Commons // 171 Second Street, Suite 300 // San Francisco, California, 94105, USA.
 //
+
+#region Summary and Documentation
+#endregion
+
+
+#region Examples
+#endregion
+
+using System.Diagnostics;
+
+#region Usings
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
+using System.Xml.Linq;
 
+using Bots.Grind;
 using CommonBehaviors.Actions;
+using Honorbuddy.QuestBehaviorCore;
 using Styx;
-using Styx.Common;
-using Styx.CommonBot;
-using Styx.CommonBot.Frames;
 using Styx.CommonBot.Profiles;
-using Styx.CommonBot.Routines;
-using Styx.Helpers;
 using Styx.Pathing;
 using Styx.TreeSharp;
 using Styx.WoWInternals;
 using Styx.WoWInternals.WoWObjects;
 
 using Action = Styx.TreeSharp.Action;
+#endregion
 
 
-namespace Honorbuddy.Quest_Behaviors.Cava.fixedTheLessonoftheBalancedRock
+// ReSharper disable once CheckNamespace
+namespace Honorbuddy.Quest_Behaviors.Cava.TheLessonoftheBalancedRock
 {
     [CustomBehaviorFileName(@"Cava\29663-PandaStarter-TheLessonoftheBalancedRock")]
-    public class TheLessonoftheBalancedRock : CustomForcedBehavior
+    public class TheLessonoftheBalancedRock : QuestBehaviorBase
     {
-        ~TheLessonoftheBalancedRock()
-        {
-            Dispose(false);
-        }
-
+        #region Constructor and Argument Processing
         public TheLessonoftheBalancedRock(Dictionary<string, string> args)
             : base(args)
         {
+            QBCLog.BehaviorLoggingContext = this;
+
             try
             {
-                // QuestRequirement* attributes are explained here...
-                //    http://www.thebuddyforum.com/mediawiki/index.php?title=Honorbuddy_Programming_Cookbook:_QuestId_for_Custom_Behaviors
-                // ...and also used for IsDone processing.
-                //Location = GetAttributeAsNullable<WoWPoint>("", true, ConstrainAs.WoWPointNonEmpty, null) ??WoWPoint.Empty;
-                QuestId = 29663; //GetAttributeAsNullable<int>("QuestId", true, ConstrainAs.QuestId(this), null) ?? 0;
-                //MobIds = GetAttributeAsNullable<int>("MobId", true, ConstrainAs.MobId, null) ?? 0;
-                QuestRequirementComplete = QuestCompleteRequirement.NotComplete;
-                QuestRequirementInLog = QuestInLogRequirement.InLog;
+                QuestId = 29663;
             }
 
             catch (Exception except)
@@ -57,288 +63,246 @@ namespace Honorbuddy.Quest_Behaviors.Cava.fixedTheLessonoftheBalancedRock
                 // * The Honorbuddy core was changed, and the behavior wasn't adjusted for the new changes.
                 // In any case, we pinpoint the source of the problem area here, and hopefully it
                 // can be quickly resolved.
-                LogMessage("error",
-                           "BEHAVIOR MAINTENANCE PROBLEM: " + except.Message + "\nFROM HERE:\n" + except.StackTrace +
-                           "\n");
+                QBCLog.Exception(except);
                 IsAttributeProblem = true;
             }
         }
 
-
-        // Attributes provided by caller
-        public uint[] MobIds { get; private set; }
-        public int QuestId { get; private set; }
-        public QuestCompleteRequirement QuestRequirementComplete { get; private set; }
-        public QuestInLogRequirement QuestRequirementInLog { get; private set; }
-        public WoWPoint Location { get; private set; }
-
-
-        // Private variables for internal state
-        private LocalPlayer Me { get { return StyxWoW.Me; } }
-        private WoWUnit SelectedMonk { get; set; }
-        private bool _isBehaviorDone;
-        private bool _isDisposed;
-        private Composite _root;
-
-
-        public void Dispose(bool isExplicitlyInitiatedDispose)
+        protected override void EvaluateUsage_DeprecatedAttributes(XElement xElement)
         {
-            if (!_isDisposed)
-            {
-                // NOTE: we should call any Dispose() method for any managed or unmanaged
-                // resource, if that resource provides a Dispose() method.
-
-                // Clean up managed resources, if explicit disposal...
-                if (isExplicitlyInitiatedDispose)
-                {
-                    // empty, for now
-                }
-
-                // Clean up unmanaged resources (if any) here...
-                TreeRoot.GoalText = string.Empty;
-                TreeRoot.StatusText = string.Empty;
-
-                // Call parent Dispose() (if it exists) here ...
-                base.Dispose();
-            }
-
-            _isDisposed = true;
+            // empty, for now (see TEMPLATE_QB.cs for example)...
         }
+
+        protected override void EvaluateUsage_SemanticCoherency(XElement xElement)
+        {
+            // empty, for now (see TEMPLATE_QB.cs for example)...
+        }
+        #endregion
+
+        
+        #region Private and Convenience variables
+        private const int AuraIdRideVehicle = 103030;
+        private const int MobIdBalancePole = 54993;
+        private const int MobIdExitPole = 57626;
+        private const int MobIdTushuiMonk = 55019;
+        private const int MobIdTushuiMonk2 = 65468;
+        private readonly WoWPoint _startingSpot = new WoWPoint(966.1218, 3284.928, 126.7932);
+        private readonly Stopwatch _doingQuestTimer = new Stopwatch();
+
+        private WoWUnit SelectedMonk { get; set; }
+        #endregion
 
 
         #region Overrides of CustomForcedBehavior
-
-        public bool IsQuestComplete()
-        {
-            var quest = StyxWoW.Me.QuestLog.GetQuestById((uint)QuestId);
-            return quest == null || quest.IsCompleted;
-        }
-
-
-
-        public Composite DoneYet
-        {
-            get
-            {
-                return
-                    new Decorator(ret => IsQuestComplete(), new Action(delegate
-                    {
-                        TreeRoot.StatusText = "Finished!";
-                        //CharacterSettings.Instance.UseMount = true;
-                        _isBehaviorDone = true;
-                        return RunStatus.Success;
-                    }));
-            }
-        }
-
-
-        public void CastSpell(string action)
-        {
-
-            var spell = StyxWoW.Me.PetSpells.FirstOrDefault(p => p.ToString() == action);
-            if (spell == null)
-                return;
-
-            Logging.Write("[Pet] Casting {0}", action);
-            Lua.DoString("CastPetAction({0})", spell.ActionBarIndex + 1);
-
-        }
-
-
-        bool IsObjectiveComplete(int objectiveId, uint questId)
-        {
-            if (this.Me.QuestLog.GetQuestById(questId) == null)
-            {
-                return false;
-            }
-            int returnVal = Lua.GetReturnVal<int>("return GetQuestLogIndexByID(" + questId + ")", 0);
-            return Lua.GetReturnVal<bool>(string.Concat(new object[] { "return GetQuestLogLeaderBoard(", objectiveId, ",", returnVal, ")" }), 2);
-        }
-
-
-        //<Vendor Name="Pearlfin Poolwatcher" Entry="55709" Type="Repair" X="-100.9809" Y="-2631.66" Z="2.150823" />
-        //<Vendor Name="Pearlfin Poolwatcher" Entry="55711" Type="Repair" X="-130.8297" Y="-2636.422" Z="1.639656" />
-
-        //209691 - sniper rifle
-        public WoWUnit FindMonk()
-        {
-            return
-                ObjectManager.GetObjectsOfType<WoWUnit>()
-                .Where(r => (r.Entry == 55019 || r.Entry == 65468) && !r.IsFriendly)
-                .OrderBy(r=>r.Distance)
-                .FirstOrDefault();
-        }
+        // DON'T EDIT THESE--they are auto-populated by Subversion
+        public override string SubversionId { get { return "$Id: 29663-PandaStarter-TheLessonoftheBalancedRock.cs 1238 2014-01-16 20:14:14Z Dogan $"; } }
+        public override string SubversionRevision { get { return "$Rev: 1238 $"; } }
 
         
-        public IEnumerable<WoWUnit> Poles
+        public override void OnFinished()
         {
-            get
+            // Defend against being called multiple times (just in case)...
+            if (!IsOnFinishedRun)
             {
-                return
-                    ObjectManager.GetObjectsOfType<WoWUnit>()
-                    .Where(r => (r.Entry == 54993 || r.Entry == 57626) && r.NpcFlags == 16777216);
-            }
-        }
-
-
-        private int stage = 0;
-        WoWPoint spot = new WoWPoint(966.1218,3284.928,126.7932);
-        
-
-        private bool spoke = false;
-
-
-        private Composite GetonPole
-        {
-            get
-            {
-                return new PrioritySelector(
-                    new Decorator(r=> !Me.InVehicle && Me.Location.Distance(spot) > 10,
-                        new Action(r=>Navigator.MoveTo(spot))),
-                    new Decorator(r=> !Me.InVehicle,
-                        new Action(r=>Poles.OrderBy(z=>z.Distance).FirstOrDefault().Interact(true)))             
-                    );
-            }
-        }
-
-
-        // 24Feb2013-08:11UTC chinajade
-        private bool IsViable(WoWObject wowObject)
-        {
-            return
-                (wowObject != null)
-                && wowObject.IsValid;
-        }
-        
-        
-        // 24Feb2013-08:11UTC chinajade
-        private bool IsViableForFighting(WoWUnit wowUnit)
-        {
-            return
-                IsViable(wowUnit)
-                && wowUnit.IsAlive
-                && !wowUnit.IsFriendly
-                && !Blacklist.Contains(wowUnit, BlacklistFlags.Combat);
-        }
-
-
-        private Composite PoleCombat
-        {
-            get
-            {
-                return new PrioritySelector(
-                    new Decorator(context => !IsViableForFighting(SelectedMonk),
-                        new Action(context => { SelectedMonk = FindMonk(); })),
-
-                    new Decorator(r=> SelectedMonk.Distance <= 5,
-                        new PrioritySelector(
-                            new Decorator(context => Me.CurrentTarget != SelectedMonk,
-                                new Action(context => { SelectedMonk.Target(); })),
-
-                            new Decorator(context => !Me.IsSafelyFacing(SelectedMonk),
-                                new Action(context => { SelectedMonk.Face(); })),
-
-                            // Poor man's combat routine (in case main CR can't handle being in a vehicle)...
-                            new Action(context =>
-                            {
-                                SelectedMonk.Interact();  // "Auto-attack" at a minimum...
-                                return RunStatus.Failure; // fall through
-                            }),
-                            new Decorator(context => SpellManager.CanCast   (3044),  new Action(context => { SpellManager.Cast   (3044); })), // Hunter - Arcane Shot
-                            new Decorator(context => SpellManager.CanCast  (56641),  new Action(context => { SpellManager.Cast  (56641); })), // Hunter - Steady Shot
-                            new Decorator(context => SpellManager.CanCast  (44614),  new Action(context => { SpellManager.Cast  (44614); })), // Mage   - Frostfire Bolt
-                            new Decorator(context => SpellManager.CanCast   (2136),  new Action(context => { SpellManager.Cast   (2136); })), // Mage   - Fire Blast
-                            new Decorator(context => SpellManager.CanCast (100780),  new Action(context => { SpellManager.Cast (100780); })), // Monk   - Jab
-                            new Decorator(context => SpellManager.CanCast (100787),  new Action(context => { SpellManager.Cast (100787); })), // Monk   - Tiger Palm
-                            new Decorator(context => SpellManager.CanCast    (585),  new Action(context => { SpellManager.Cast    (585); })), // Priest - Smite
-                            new Decorator(context => SpellManager.CanCast   (1752),  new Action(context => { SpellManager.Cast   (1752); })), // Rogue  - Sinister Strike
-                            new Decorator(context => SpellManager.CanCast   (2098),  new Action(context => { SpellManager.Cast   (2098); })), // Rogue  - Eviscerate
-                            new Decorator(context => SpellManager.CanCast    (403),  new Action(context => { SpellManager.Cast    (403); })), // Shaman - Lightning Bolt
-                            new Decorator(context => SpellManager.CanCast  (73899),  new Action(context => { SpellManager.Cast  (73899); })), // Shaman - Primal Strike
-                            new Decorator(context => SpellManager.CanCast     (78),  new Action(context => { SpellManager.Cast     (78); })), // Warrior- Heroic Strike
-                            new Decorator(context => SpellManager.CanCast  (34428),  new Action(context => { SpellManager.Cast  (34428); })), // Warrior- Victory Rush
-
-                            // Most combat routines will fail here, because being on the pole is considered being in a vehicle...
-                            new Decorator(targetContext => RoutineManager.Current.CombatBehavior != null,
-                                RoutineManager.Current.CombatBehavior),
-                            new Action(targetContext => { RoutineManager.Current.Combat(); })
-                        )),
-
-                    new Decorator(r=> SelectedMonk.Distance > 5,
-                        new Action(delegate
-                        {                                                                 
-                            var Pole =
-                                Poles.Where(r => r.WithinInteractRange)
-                                    .OrderBy(r => r.Location.Distance(SelectedMonk.Location))
-                                    .FirstOrDefault();
-                            Pole.Interact(true);
-                        }))
-                );
-            }
-        }
-
-
-        protected override Composite CreateBehavior()
-        {
-            return _root ?? (_root =
-                new Decorator(ret => !_isBehaviorDone,
-                    new PrioritySelector(DoneYet, GetonPole,PoleCombat, new ActionAlwaysSucceed()))
-            );
-        }
-
-
-
-        public override void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-
-        public override bool IsDone
-        {
-            get
-            {
-                return (_isBehaviorDone     // normal completion
-                        || !UtilIsProgressRequirementsMet(QuestId, QuestRequirementInLog, QuestRequirementComplete));
+                // QuestBehaviorBase.OnFinished() will set IsOnFinishedRun...
+                base.OnFinished();
             }
         }
 
 
         public override void OnStart()
         {
-
-
-            // This reports problems, and stops BT processing if there was a problem with attributes...
-            // We had to defer this action, as the 'profile line number' is not available during the element's
-            // constructor call.
-            OnStart_HandleAttributeProblem();
+            // Let QuestBehaviorBase do basic initialization of the behavior, deal with bad or deprecated attributes,
+            // capture configuration state, install BT hooks, etc.  This will also update the goal text.
+            var isBehaviorShouldRun = OnStart_QuestBehaviorCore();
+            _doingQuestTimer.Start();
 
             // If the quest is complete, this behavior is already done...
             // So we don't want to falsely inform the user of things that will be skipped.
-            if (!IsDone)
+            if (isBehaviorShouldRun)
             {
-
-                //CharacterSettings.Instance.UseMount = false;
-
-                if (TreeRoot.Current != null && TreeRoot.Current.Root != null && TreeRoot.Current.Root.LastStatus != RunStatus.Running)
-                {
-                    var currentRoot = TreeRoot.Current.Root;
-                    if (currentRoot is GroupComposite)
-                    {
-                        var root = (GroupComposite)currentRoot;
-                        root.InsertChild(0, CreateBehavior());
-                    }
-                }
-
-                //TreeRoot.TicksPerSecond = 30;
-                // Me.QuestLog.GetQuestById(27761).GetObjectives()[2].
-
-                PlayerQuest quest = StyxWoW.Me.QuestLog.GetQuestById((uint)QuestId);
-
-                TreeRoot.GoalText = this.GetType().Name + ": " +
-                                    ((quest != null) ? ("\"" + quest.Name + "\"") : "In Progress");
+                // The Poles for this quest are "Vehicles"...
+                // Combat Routines simply get confused while in vehicles,
+                // so we turn off the Combat Routine while we run this behavior.
+                // The QuestBehaviorBase.OnFinished() action will restore this change.
+                LevelBot.BehaviorFlags &=
+                    ~(BehaviorFlags.Combat
+                        | BehaviorFlags.Loot
+                        | BehaviorFlags.Pull
+                        | BehaviorFlags.Vendor);
             }
+        }
+        #endregion
+
+
+        #region Main Behaviors
+        protected override Composite CreateBehavior_QuestbotMain()
+        {
+            return new Decorator(context => !IsDone && !Me.IsDead,
+                new PrioritySelector(
+                    DoneYet(),
+                    MoveToStart(),
+                    RestAndHeal(),
+                    GetOnPole(),
+                    PoleCombat(),
+                    new ActionAlwaysSucceed()
+                ));
+        }
+        #endregion
+
+
+        #region Helpers
+        private Composite DoneYet()
+        {
+            return new Decorator(context => Me.IsQuestComplete(QuestId) || !Me.IsAlive || _doingQuestTimer.ElapsedMilliseconds >= 180000,
+                new PrioritySelector(
+                    // Get off pole...
+                    new Decorator(context => Query.IsInVehicle(),
+                        new Action(context => Utility.ExitVehicle())),
+
+                    // Mark as complete...
+                    new Action(context =>
+                    {
+                        BehaviorDone("Finished!");
+                        return RunStatus.Success;
+                    })
+                ));
+        }
+
+
+        private WoWUnit FindMonk()
+        {
+            using (StyxWoW.Memory.AcquireFrame())
+            {
+                return
+                   (from wowUnit in ObjectManager.GetObjectsOfType<WoWUnit>()
+                    where
+                        IsMonkPersuable(wowUnit)
+                    orderby wowUnit.DistanceSqr
+                    select wowUnit)
+                    .FirstOrDefault();
+            }
+        }
+
+
+        private IEnumerable<WoWUnit> FindPoles()
+        {
+            return
+               (from wowUnit in ObjectManager.GetObjectsOfType<WoWUnit>()
+                where
+                    (wowUnit.Entry == MobIdBalancePole || wowUnit.Entry == MobIdExitPole)
+                    && wowUnit.NpcFlags == 16777216
+                select wowUnit);
+        }
+
+
+        private bool IsMonkPersuable(WoWUnit wowUnit)
+        {
+            return
+                Query.IsViable(wowUnit)
+                && (wowUnit.Entry == MobIdTushuiMonk || wowUnit.Entry == MobIdTushuiMonk2)
+                && wowUnit.HasAura(AuraIdRideVehicle)
+                && Query.IsViableForFighting(wowUnit)
+                && !Query.IsInCompetition(wowUnit, 10);   // Don't go after another player's monk
+        }
+
+
+        private Composite GetOnPole()
+        {
+            return new PrioritySelector(
+                new Decorator(r => !Query.IsInVehicle(),
+                    new CompositeThrottle(TimeSpan.FromMilliseconds(500),
+                        new Action(r =>
+                        {
+                            var firstPole =
+                               (from pole in FindPoles()
+                                orderby pole.DistanceSqr
+                                select pole)
+                                .FirstOrDefault();
+                                
+                            if (firstPole != null)
+                            {
+                                firstPole.Interact(true);
+                                // Disable combat routine while on pole...
+                                LevelBot.BehaviorFlags &=
+                                    ~(BehaviorFlags.Combat
+                                        | BehaviorFlags.Loot
+                                        | BehaviorFlags.Pull
+                                        | BehaviorFlags.Vendor);
+                            }
+                        })
+                    ))
+                );
+        }
+
+
+        private Composite MoveToStart()
+        {
+            return new Decorator(r => !Query.IsInVehicle() && Me.Location.Distance(_startingSpot) > 10,
+                    new Action(r => Navigator.MoveTo(_startingSpot)));
+        }
+
+
+        private Composite PoleCombat()
+        {
+            return new PrioritySelector(
+                // Pick a target, if we don't have one...
+                new Decorator(context => !IsMonkPersuable(SelectedMonk),
+                    new Action(context => { SelectedMonk = FindMonk(); })),
+
+                // Make certain target stays selected...
+                new Decorator(context => Me.CurrentTarget != SelectedMonk,
+                    new ActionFail(context => SelectedMonk.Target())),
+
+                // If we are within melee range of target, spank it...
+                new Decorator(r => SelectedMonk.IsWithinMeleeRange,
+                    new UtilityBehaviorPS.MiniCombatRoutine()),
+
+                // If we are out of range of target, move closer...
+                new Decorator(r => !SelectedMonk.IsWithinMeleeRange,
+                    new CompositeThrottle(TimeSpan.FromMilliseconds(500),
+                        new Action(delegate
+                        {
+                            var bestPole =
+                               (from pole in FindPoles()
+                                where
+                                    pole.WithinInteractRange
+                                orderby pole.Location.DistanceSqr(SelectedMonk.Location)
+                                select pole)
+                                .FirstOrDefault();
+
+                            // If we "can't get there from here", then jump own and start over...
+                            if (bestPole == null)
+                                { Utility.ExitVehicle(); }
+
+                            // Otherwise, move to the next best pole...
+                            else
+                            {
+                                bestPole.Interact(true);
+                                // Reset the stuck handler so it doesn't false positive...
+                                Navigator.NavigationProvider.StuckHandler.Reset();
+                            }
+                        })))
+            );
+        }
+
+
+        private Composite RestAndHeal()
+        {
+            return new PrioritySelector(
+                // Get off pole and rest, if we are between fights, and don't have enough health to start next fight...
+                new Decorator(context => !IsMonkPersuable(SelectedMonk) && Query.IsInVehicle() && (Me.HealthPercent < 50),
+                    new Action(context => Utility.ExitVehicle())),
+
+                // Rest until health is safe...
+                new Decorator(context => !Query.IsInVehicle() && (Me.HealthPercent < 95),
+                    new Action(context =>
+                        {
+                            // Allow Combat Routine to run while resting...
+                            // With this, we can defend ourself, and use any healing resources the class may have
+                            LevelBot.BehaviorFlags |= (BehaviorFlags.Combat | BehaviorFlags.Rest);
+                        }))
+                );
         }
         #endregion
     }
