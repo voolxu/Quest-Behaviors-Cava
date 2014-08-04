@@ -86,17 +86,17 @@ namespace Honorbuddy.Quest_Behaviors.Cava.QVortex
 						    if (!OnCooldown1)
 						    {
 						        Lua.DoString("CastPetAction(1)");
-						        Thread.Sleep(500);
+						        StyxWoW.Sleep(500);
 						    }
 						    if (!OnCooldown2)
 						    {
 						        Lua.DoString("CastPetAction(2)");
-                                Thread.Sleep(500);
+                                StyxWoW.Sleep(500);
 						    }
                             if (!OnCooldown3)
 						    {
 						        Lua.DoString("CastPetAction(3)");
-                                Thread.Sleep(500);
+                                StyxWoW.Sleep(500);
 						    }
                             return RunStatus.Success;
 						}));
