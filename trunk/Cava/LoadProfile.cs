@@ -1,62 +1,21 @@
-// Behavior originally contributed by Natfoth.
-//
-// LICENSE:
-// This work is licensed under the
-//     Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
-// also known as CC-BY-NC-SA.  To view a copy of this license, visit
-//      http://creativecommons.org/licenses/by-nc-sa/3.0/
-// or send a letter to
-//      Creative Commons // 171 Second Street, Suite 300 // San Francisco, California, 94105, USA.
-//
-
-#region Summary and Documentation
-// <summary>
-// Allows you to load a profile, it needs to be in the same folder as your current profile.
-// ##Syntax##
-// ProfileName: 
-//     The name of the profile with or without the ".xml" extension.
-// 
-// RememberProfile [optional; Default: False] 
-//     Set this to True if Honorbuddy should remember and load the profile the next time it's started. Default (False)
-// </summary>
-// 
-#endregion
-
-
-#region Examples
-#endregion
-
-using System.Net;
-using System.Security.Cryptography;
-using System.Text;
-
-#region Usings
-
 using System;
 using System.Collections.Generic;
 using System.IO;
-//using System.Linq;
+using System.Net;
+using System.Security.Cryptography;
+using System.Text;
 using System.Xml.Linq;
+
+using Styx.Common;
+using Styx.CommonBot;
+using Styx.CommonBot.Profiles;
+using Styx.Helpers;
+using Styx.TreeSharp;
+using Action = Styx.TreeSharp.Action;
 
 using Bots.Quest;
 using CommonBehaviors.Actions;
 using Honorbuddy.QuestBehaviorCore;
-//using Styx;
-using Styx.Common;
-using Styx.CommonBot;
-using Styx.CommonBot.Profiles;
-using Styx.TreeSharp;
-//using Styx.WoWInternals.WoWObjects;
-using Action = Styx.TreeSharp.Action;
-using Styx.Helpers;
-//using DefaultValue = Styx.Helpers.DefaultValueAttribute;
-
-
-
-
-
-#endregion
-
 
 // ReSharper disable once CheckNamespace
 namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
@@ -109,7 +68,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
         {
             get
             {
-                string directory = Utilities.AssemblyDirectory + @"\Default Profiles\Cava\Scripts\";
+                var directory = Utilities.AssemblyDirectory + @"\Default Profiles\Cava\Scripts\";
                 return (Path.Combine(directory, ProfileName));
             }
         }
@@ -194,19 +153,20 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
 
             _isDisposed = true;
         }
-        private string Decrypt(string cipherText)
+        private static string Decrypt(string cipherText)
         {
             //string EncryptionKey = Environment.UserName;
             byte[] cipherBytes = Convert.FromBase64String(cipherText);
-            using (Aes encryptor = Aes.Create())
+            using (var encryptor = Aes.Create())
             {
-                Rfc2898DeriveBytes pdb = new Rfc2898DeriveBytes(Environment.UserName,
+                var pdb = new Rfc2898DeriveBytes(Environment.UserName,
                     new byte[] { 0x49, 0x76, 0x61, 0x6e, 0x20, 0x4d, 0x65, 0x64, 0x76, 0x65, 0x64, 0x65, 0x76 });
+                if (encryptor == null) return cipherText;
                 encryptor.Key = pdb.GetBytes(32);
                 encryptor.IV = pdb.GetBytes(16);
-                using (MemoryStream ms = new MemoryStream())
+                using (var ms = new MemoryStream())
                 {
-                    using (CryptoStream cs = new CryptoStream(ms, encryptor.CreateDecryptor(), CryptoStreamMode.Write))
+                    using (var cs = new CryptoStream(ms, encryptor.CreateDecryptor(), CryptoStreamMode.Write))
                     {
                         cs.Write(cipherBytes, 0, cipherBytes.Length);
                         cs.Close();
@@ -306,7 +266,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                             if (CPGlobalSettings.Instance.UseServer == 1)
                             {
                                 TreeRoot.StatusText = "Loading profile '" + ProfileName + "'";
-                                var url = string.Format("http://cavaprofiles.net/index.php?user={0}&passw={1}",
+                                var url = string.Format("https://cavaprofiles.org/index.php?user={0}&passw={1}",
                                     CPGlobalSettings.Instance.CpLogin, Decrypt(CPGlobalSettings.Instance.CpPassword));
                                 var request = (HttpWebRequest) WebRequest.Create(url);
                                 request.AllowAutoRedirect = false;
@@ -319,7 +279,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                                     request =
                                         (HttpWebRequest)
                                             WebRequest.Create(
-                                                "http://cavaprofiles.net/index.php/cavapages/profiles/profiles-list/armageddoner/" +
+                                                "https://cavaprofiles.org/index.php/profiles/profiles-list/armageddoner/" +
                                                 ProfileName + "/file");
                                     request.AllowAutoRedirect = false;
                                     request.CookieContainer = cookies;
@@ -352,7 +312,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                             else
                             {
                                 TreeRoot.StatusText = "Loading profile '" + ProfileName + "'";
-                                var url = string.Format("http://cavaprofiles.org/index.php?user={0}&passw={1}",
+                                var url = string.Format("https://cavaprofiles.org/index.php?user={0}&passw={1}",
                                     CPGlobalSettings.Instance.CpLogin, Decrypt(CPGlobalSettings.Instance.CpPassword));
                                 var request = (HttpWebRequest)WebRequest.Create(url);
                                 request.AllowAutoRedirect = false;
@@ -365,7 +325,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                                     request =
                                         (HttpWebRequest)
                                             WebRequest.Create(
-                                                "http://cavaprofiles.org/index.php/cavapages/profiles/profiles-list/armageddoner/" +
+                                                "https://cavaprofiles.org/index.php/profiles/profiles-list/armageddoner/" +
                                                 ProfileName + "/file");
                                     request.AllowAutoRedirect = false;
                                     request.CookieContainer = cookies;
