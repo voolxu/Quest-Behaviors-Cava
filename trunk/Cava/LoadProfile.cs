@@ -306,7 +306,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                             if (CPGlobalSettings.Instance.UseServer == 1)
                             {
                                 TreeRoot.StatusText = "Loading profile '" + ProfileName + "'";
-                                var url = string.Format("https://cavaprofiles.net/index.php?user={0}&passw={1}",
+                                var url = string.Format("http://cavaprofiles.net/index.php?user={0}&passw={1}",
                                     CPGlobalSettings.Instance.CpLogin, Decrypt(CPGlobalSettings.Instance.CpPassword));
                                 var request = (HttpWebRequest) WebRequest.Create(url);
                                 request.AllowAutoRedirect = false;
@@ -319,7 +319,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                                     request =
                                         (HttpWebRequest)
                                             WebRequest.Create(
-                                                "https://cavaprofiles.net/index.php/cavapages/profiles/profiles-list/armageddoner/" +
+                                                "http://cavaprofiles.net/index.php/cavapages/profiles/profiles-list/armageddoner/" +
                                                 ProfileName + "/file");
                                     request.AllowAutoRedirect = false;
                                     request.CookieContainer = cookies;
