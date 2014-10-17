@@ -144,7 +144,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.VehicleCanSelfHeal
 
                 _configMemento = null;
 
-                BotEvents.OnBotStop -= BotEvents_OnBotStop;
+                BotEvents.OnBotStopped -= BotEvents_OnBotStop;
                 BotEvents.Player.OnPlayerDied -= Player_OnPlayerDied;
                 Targeting.Instance.RemoveTargetsFilter -= Instance_RemoveTargetsFilter;
 
@@ -407,7 +407,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.VehicleCanSelfHeal
                 _configMemento = new ConfigMemento();
 
                 BotEvents.Player.OnPlayerDied += Player_OnPlayerDied;
-                BotEvents.OnBotStop += BotEvents_OnBotStop;
+                BotEvents.OnBotStopped += BotEvents_OnBotStop;
                 Targeting.Instance.RemoveTargetsFilter += Instance_RemoveTargetsFilter;
 
                 // Disable any settings that may cause distractions --

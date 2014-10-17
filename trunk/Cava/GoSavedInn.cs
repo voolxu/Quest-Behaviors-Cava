@@ -228,7 +228,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.GoSavedInn
                 new Decorator(ret => ItemId.Cooldown == 0,
                     new Sequence(
                         new Action(ret => TreeRoot.StatusText = "Using Hearthstone"),
-                        new Action(ret => Mount.Dismount()), 
+                        new Action(ret => new Mount.ActionLandAndDismount()), 
                         new Action(ret => ItemId.UseContainerItem()),
                         new Action(ret => StyxWoW.SleepForLagDuration()),
                         new DecoratorContinue( ret => !Me.Combat,

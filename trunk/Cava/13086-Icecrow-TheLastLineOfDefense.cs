@@ -39,6 +39,7 @@ using Action = Styx.TreeSharp.Action;
 namespace Honorbuddy.Quest_Behaviors.SpecificQuests.Cava.TheLastLineOfDefense
 {
     [CustomBehaviorFileName(@"Cava\13086-Icecrow-TheLastLineOfDefense")]
+    // ReSharper disable once UnusedMember.Global
     public class TheLastLineOfDefense : CustomForcedBehavior
     {
         private const uint ForgottenDepthsSlayerId = 30593;//kill 100
@@ -50,13 +51,14 @@ namespace Honorbuddy.Quest_Behaviors.SpecificQuests.Cava.TheLastLineOfDefense
         private readonly VehicleWeapon _argentCannon;
         private WoWUnit _argentCannonunit;
 
+
         private WoWUnit ArgentCannon
         {
             get
             {
                 if (!Query.IsViable(_argentCannonunit))
                 {
-                    _argentCannonunit = (Me.TransportGuid != 0)
+                    _argentCannonunit = (Me.TransportGuid.IsValid)
                         ? ObjectManager.GetObjectByGuid<WoWUnit>(Me.TransportGuid)
                         : null;
                 }
@@ -64,15 +66,6 @@ namespace Honorbuddy.Quest_Behaviors.SpecificQuests.Cava.TheLastLineOfDefense
                 return _argentCannonunit;
             }
         }
-        
-        
-        
-        
-        
-        
-        
-        
-        
         
         private readonly uint[] _mobIds = {ForgottenDepthsSlayerId, FrostbroodDestroyerId};
 
@@ -89,7 +82,7 @@ namespace Honorbuddy.Quest_Behaviors.SpecificQuests.Cava.TheLastLineOfDefense
             _argentCannon = new VehicleWeapon(1, weaponArticulation, WeaponMuzzleVelocity, WeaponProjectileGravity);
         }
 
-        public int QuestId { get; set; }
+        private int QuestId { get; set; }
 
 
         public override bool IsDone
@@ -101,9 +94,9 @@ namespace Honorbuddy.Quest_Behaviors.SpecificQuests.Cava.TheLastLineOfDefense
         {
             get { return (StyxWoW.Me); }
         }
-        
 
-        public WoWUnit BestTarget
+
+        private WoWUnit BestTarget
         {
             get
             {
@@ -137,7 +130,7 @@ namespace Honorbuddy.Quest_Behaviors.SpecificQuests.Cava.TheLastLineOfDefense
         }
 
 
-        protected Composite CreateBehavior_CombatMain()
+        private Composite CreateBehavior_CombatMain()
         {
             return _root ??
                    (_root =
@@ -216,12 +209,14 @@ namespace Honorbuddy.Quest_Behaviors.SpecificQuests.Cava.TheLastLineOfDefense
                 TreeRoot.StatusText = string.Empty;
 
                 // Call parent Dispose() (if it exists) here ...
+                // ReSharper disable once CSharpWarnings::CS0618
                 base.Dispose();
             }
 
             _isDisposed = true;
         }
 
+        // ReSharper disable once CSharpWarnings::CS0672
         public override void Dispose()
         {
             Dispose(true);
