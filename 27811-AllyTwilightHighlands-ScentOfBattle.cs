@@ -184,7 +184,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.ScentOfBattle
                                 new Action(ret =>Lua.DoString("Dismount()")),
                                 new Decorator(ret => Me.Class == WoWClass.Druid,
                                     new Action(ret => Lua.DoString("RunMacroText('/cancelaura Flight Form')"))),
-                                new Action(ret =>Mount.Dismount())
+                                new Action(ret => new Mount.ActionLandAndDismount())
                         )),
                         //new Decorator(ret => RoutineManager.Current.CombatBehavior != null, RoutineManager.Current.CombatBehavior),
                         //new Action(c => RoutineManager.Current.Combat()),

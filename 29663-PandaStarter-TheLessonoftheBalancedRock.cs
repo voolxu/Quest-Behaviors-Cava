@@ -256,7 +256,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.TheLessonoftheBalancedRock
 
                 // If we are within melee range of target, spank it...
                 new Decorator(r => SelectedMonk.IsWithinMeleeRange,
-                    new UtilityBehaviorPS.MiniCombatRoutine()),
+                    new ActionRunCoroutine(context => UtilityCoroutine.MiniCombatRoutine())),
 
                 // If we are out of range of target, move closer...
                 new Decorator(r => !SelectedMonk.IsWithinMeleeRange,

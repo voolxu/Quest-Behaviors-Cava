@@ -239,7 +239,7 @@ namespace Styx.Bot.Quest_Behaviors.Cava2.TaxiRide
                     new Decorator(ret => CurrentNpc != null && CurrentNpc.Location.Distance(Me.Location) <= 5 && Me.IsMoving,
                         new Action(ret => WoWMovement.MoveStop())),
                     new Decorator(ret => CurrentNpc != null && CurrentNpc.Location.Distance(Me.Location) <= 5 && Me.IsMounted(),
-                        new Action(ret => Mount.Dismount())),
+                        new Action(ret => new Mount.ActionLandAndDismount())),
                     new Decorator(ret => CurrentNpc != null && CurrentNpc.Location.Distance(Me.Location) <= 5 && Me.IsShapeshifted(),
                         new Action(ret => Lua.DoString("CancelShapeshiftForm()"))),
                     new Decorator(ret => TaxiNumber == "0" && DestName == "ViewNodesOnly" && CurrentNpc != null && CurrentNpc.Location.Distance(Me.Location) <= 5 ,

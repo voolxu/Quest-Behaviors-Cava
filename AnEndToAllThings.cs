@@ -144,22 +144,22 @@ namespace Honorbuddy.Quest_Behaviors.Cava.AnEndToAllThings
 			}
 		}
 
-		private WoWUnit DragonVehicle
-		{
-			get
-			{
-				if (!Query.IsViable(_dragonVehicle))
-				{
-					_dragonVehicle = (Me.TransportGuid != 0)
-						? ObjectManager.GetObjectByGuid<WoWUnit>(Me.TransportGuid)
-						: null;
-				}
+        private WoWUnit DragonVehicle
+        {
+            get
+            {
+                if (!Query.IsViable(_dragonVehicle))
+                {
+                    _dragonVehicle = (Me.TransportGuid.IsValid)
+                        ? ObjectManager.GetObjectByGuid<WoWUnit>(Me.TransportGuid)
+                        : null;
+                }
 
-				return _dragonVehicle;
-			}
-		}
-
-		private const double FlyingPathPrecision = 15.0;
+                return _dragonVehicle;
+            }
+        }
+        
+        private const double FlyingPathPrecision = 15.0;
 		private const double MissileImpactClearanceDistance = 25.0;
 		private const double TargetDistance2DMax = 80.0;
 		private const double TargetDistance2DMin = 60.0;
@@ -266,9 +266,9 @@ namespace Honorbuddy.Quest_Behaviors.Cava.AnEndToAllThings
 				new Decorator(context => Me.IsQuestComplete(QuestId),
 					new Action(context => { BehaviorDone(string.Format("quest complete")); })),
 
-				// If we're mounted on something other than the dragon, then dismount...
-				new Decorator(context => Me.Mounted && !Query.IsViable(DragonVehicle),
-					new UtilityBehaviorPS.ExecuteMountStrategy(context => MountStrategyType.DismountOrCancelShapeshift)),
+                // If we're mounted on something other than the dragon, then dismount...
+                new Decorator(context => Me.Mounted && !Query.IsViable(DragonVehicle),
+                    new ActionRunCoroutine(context => UtilityCoroutine.ExecuteMountStrategy(MountStrategyType.DismountOrCancelShapeshift))),
 
 				// If we're on the dragon, get moving...
 				new Decorator(context => Query.IsViable(DragonVehicle),
