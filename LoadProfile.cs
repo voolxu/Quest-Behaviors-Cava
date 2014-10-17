@@ -279,7 +279,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                                     request =
                                         (HttpWebRequest)
                                             WebRequest.Create(
-                                                "https://cavaprofiles.net/index.php/cavapages/profiles/profiles-list/armageddoner/" +
+                                                "https://cavaprofiles.net/index.php/profiles/profiles-list/armageddoner/" +
                                                 ProfileName + "/file");
                                     request.AllowAutoRedirect = false;
                                     request.CookieContainer = cookies;
@@ -325,7 +325,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                                     request =
                                         (HttpWebRequest)
                                             WebRequest.Create(
-                                                "https://cavaprofiles.org/index.php/cavapages/profiles/profiles-list/armageddoner/" +
+                                                "https://cavaprofiles.org/index.php/profiles/profiles-list/armageddoner/" +
                                                 ProfileName + "/file");
                                     request.AllowAutoRedirect = false;
                                     request.CookieContainer = cookies;
