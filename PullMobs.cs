@@ -82,7 +82,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
-
+using Buddy.Coroutines;
 using CommonBehaviors.Actions;
 
 using Honorbuddy.QuestBehaviorCore;
@@ -156,7 +156,8 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullMobs
 				QuestId = GetAttributeAsNullable<int>("QuestId", isQuestIdRequired, ConstrainAs.QuestId(this), null) ?? 0;
 				QuestRequirementComplete = GetAttributeAsNullable<QuestCompleteRequirement>("QuestCompleteRequirement", false, null, null) ?? QuestCompleteRequirement.NotComplete;
 				QuestRequirementInLog = GetAttributeAsNullable<QuestInLogRequirement>("QuestInLogRequirement", false, null, null) ?? QuestInLogRequirement.InLog;
-                PullMob = GetAttributeAsNullable<bool>("PullMob", false, null, null) ?? false;//added
+                // Added by Cava
+                PullMob = GetAttributeAsNullable<bool>("PullMob", false, null, null) ?? false;
 
 
 				// Semantic coherency --
@@ -175,7 +176,6 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullMobs
 					IsAttributeProblem = true;
 				}
 
-
                 // Added by Cava
                 if (PullMob && Me.Level < 1)
                 {
@@ -187,6 +187,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullMobs
                     LogMessage("error", "You must specify one or more MobId(s) to enable PullMob");
                     IsAttributeProblem = true;
                 }
+
 
 				// Find the item name --
 				ItemInfo itemInfo = ItemInfo.FromId((uint)CollectItemId);
@@ -231,7 +232,8 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullMobs
 		public int QuestId { get; private set; }
 		public QuestCompleteRequirement QuestRequirementComplete { get; private set; }
 		public QuestInLogRequirement QuestRequirementInLog { get; private set; }
-        public bool PullMob { get; private set; }//added
+        // Added by Cava
+        public bool PullMob { get; private set; }
 
 		// Private properties and data...
 		private HuntingGroundBehavior _behavior_HuntingGround;
@@ -491,7 +493,6 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullMobs
 						return (RunStatus.Failure);     // Fall through
 					}),
 
-
                     //Added by Cava
                     new Decorator(ret => PullMob && !Me.IsCasting && CurrentTarget.Location.Distance(Me.Location) < 30,
                         new Action(delegate
@@ -501,17 +502,17 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullMobs
                             { CurrentTarget.ToUnit().Face(); }
                             if (Me.Class == WoWClass.DeathKnight)
                             { SpellManager.Cast(49576); } // DeathKnight - Death Grip 30)
-                            StyxWoW.Sleep(1500);
+                            new Sleep(1500);
                             { SpellManager.Cast(49143); } // DeathKnight - Frost Strike)
                             if (Me.Class == WoWClass.Druid)
                             { SpellManager.Cast(8921); } // Druid - MoonFire 40)
                             if (Me.Class == WoWClass.Hunter)
                             { SpellManager.Cast(3044); } // Hunter - Arcane Shot 40)
                             if (Me.Class == WoWClass.Mage)
-                            { SpellManager.Cast(44614); StyxWoW.Sleep(1500); } // Mage - Frostfire Bolt 40
+                            { SpellManager.Cast(44614); new Sleep(1500); } // Mage - Frostfire Bolt 40
                             if (Me.Class == WoWClass.Monk)
                             { SpellManager.Cast(115546); } // Monk - Provoke 40)
-                            StyxWoW.Sleep(1500);
+                            new Sleep(1500);
                             { SpellManager.Cast(100780); } // Monk - Jab)
                             if (Me.Class == WoWClass.Paladin)
                             { SpellManager.Cast(20271); } // Paladin - Judgment 30
@@ -520,16 +521,17 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullMobs
                             if (Me.Class == WoWClass.Rogue)
                             { SpellManager.Cast(121733); } // Rogue - Throw 30)
                             if (Me.Class == WoWClass.Shaman)
-                            { SpellManager.Cast(403); StyxWoW.Sleep(1500); } // Shaman - Lightning Bolt 30
+                            { SpellManager.Cast(403); new Sleep(1500); } // Shaman - Lightning Bolt 30
                             if (Me.Class == WoWClass.Warlock)
                             { SpellManager.Cast(172); } // Warlock - Corruption 40)
                             if (Me.Class == WoWClass.Warrior)
                             { SpellManager.Cast(122475); } // Warrior - Throw 30)
-                            StyxWoW.Sleep(1500);
+                            new Sleep(1500);
+
                             return (RunStatus.Failure);
                         })
                     ),
-                    
+                
                     // If we're not at target, move to it...
 					_behavior_HuntingGround.CreateBehavior_MoveToTarget(),
 
