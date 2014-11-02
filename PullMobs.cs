@@ -80,13 +80,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using Buddy.Coroutines;
 using CommonBehaviors.Actions;
-
 using Honorbuddy.QuestBehaviorCore;
-
 using Styx;
 using Styx.CommonBot;
 using Styx.CommonBot.Frames;
@@ -495,43 +493,57 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullMobs
 
                     //Added by Cava
                     new Decorator(ret => PullMob && !Me.IsCasting && CurrentTarget.Location.Distance(Me.Location) < 30,
-                        new Action(delegate
-                        {
-                            WoWMovement.MoveStop();
-                            if (!Me.IsSafelyFacing(CurrentTarget))
-                            { CurrentTarget.ToUnit().Face(); }
-                            if (Me.Class == WoWClass.DeathKnight)
-                            { SpellManager.Cast(49576); } // DeathKnight - Death Grip 30)
-                            new Sleep(1500);
-                            { SpellManager.Cast(49143); } // DeathKnight - Frost Strike)
-                            if (Me.Class == WoWClass.Druid)
-                            { SpellManager.Cast(8921); } // Druid - MoonFire 40)
-                            if (Me.Class == WoWClass.Hunter)
-                            { SpellManager.Cast(3044); } // Hunter - Arcane Shot 40)
-                            if (Me.Class == WoWClass.Mage)
-                            { SpellManager.Cast(44614); new Sleep(1500); } // Mage - Frostfire Bolt 40
-                            if (Me.Class == WoWClass.Monk)
-                            { SpellManager.Cast(115546); } // Monk - Provoke 40)
-                            new Sleep(1500);
-                            { SpellManager.Cast(100780); } // Monk - Jab)
-                            if (Me.Class == WoWClass.Paladin)
-                            { SpellManager.Cast(20271); } // Paladin - Judgment 30
-                            if (Me.Class == WoWClass.Priest)
-                            { SpellManager.Cast(589); } // Priest - Shadow Word: Pain 40)
-                            if (Me.Class == WoWClass.Rogue)
-                            { SpellManager.Cast(121733); } // Rogue - Throw 30)
-                            if (Me.Class == WoWClass.Shaman)
-                            { SpellManager.Cast(403); new Sleep(1500); } // Shaman - Lightning Bolt 30
-                            if (Me.Class == WoWClass.Warlock)
-                            { SpellManager.Cast(172); } // Warlock - Corruption 40)
-                            if (Me.Class == WoWClass.Warrior)
-                            { SpellManager.Cast(122475); } // Warrior - Throw 30)
-                            new Sleep(1500);
-
-                            return (RunStatus.Failure);
-                        })
-                    ),
-                
+                        new Action(context =>
+                            {
+                                var spell = "";
+                                switch (Me.Class)
+                                {
+                                        case WoWClass.Mage:
+                                            spell = "Ice Lance";
+                                            break;
+                                        case WoWClass.Druid:
+                                            spell = "Moonfire";
+                                            break;
+                                        case WoWClass.Paladin:
+                                            spell = "Judgment";
+                                            break;
+                                        case WoWClass.Priest:
+                                            spell = "Shadow Word: Pain";
+                                            break;
+                                        case WoWClass.Shaman:
+                                            spell = "Flame Shock";
+                                            break;
+                                        case WoWClass.Warlock:
+                                            spell = "Corruption";
+                                            break;
+                                        case WoWClass.DeathKnight:
+                                            spell = "Dark Command";
+                                            break;
+                                        case WoWClass.Hunter:
+                                            spell = "Arcane Shot";
+                                            break;
+                                        case WoWClass.Warrior:
+                                            if (SpellManager.CanCast("Shoot"))
+                                                spell = "Shoot";
+                                            if (SpellManager.CanCast("Throw"))
+                                                spell = "Throw";
+                                            break;
+                                        case WoWClass.Rogue:
+                                            if (SpellManager.CanCast("Shoot"))
+                                                spell = "Shoot";
+                                            if (SpellManager.CanCast("Throw"))
+                                                spell = "Throw";
+                                            break;
+                                        case WoWClass.Monk:
+                                            spell = "Provoke";
+                                            break;
+                                }
+                                WoWMovement.MoveStop();
+                                CurrentTarget.ToUnit().Target();
+                                CurrentTarget.ToUnit().Face();
+                                SpellManager.Cast(spell);
+                            }
+                    )),
                     // If we're not at target, move to it...
 					_behavior_HuntingGround.CreateBehavior_MoveToTarget(),
 
@@ -550,6 +562,8 @@ namespace Honorbuddy.Quest_Behaviors.Cava.PullMobs
 			);
 		}
 
+
+        
         public override void OnFinished()
         {
             TreeRoot.GoalText = string.Empty;
