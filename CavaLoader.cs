@@ -51,40 +51,38 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
                 : base(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, string.Format(@"Settings\CavaPlugin\Main-Settings.xml")))
             {
             }
-        [Setting, DefaultValue(false)]
-        public bool BotAllowUpdate { get; set; }
-        [Setting, DefaultValue(false)]
-        public bool AllowUpdate { get; set; }
-        [Setting, DefaultValue(false)]
-        public bool Allowlunch { get; set; }
-        [Setting, DefaultValue(0)]
-        public int BaseProfileToLunch { get; set; }
-        [Setting, DefaultValue(false)]
-        public bool AutoShutdownWhenUpdate { get; set; }
-        [Setting, DefaultValue(false)]
-        public bool PBMiningBlacksmithing { get; set; }
-        [Setting, DefaultValue(false)]
-        public bool BotPBMiningBlacksmithing { get; set; }
-        [Setting, DefaultValue(false)]
-        public bool RessAfterDie { get; set; }
-        [Setting, DefaultValue(0)]
-        public int language { get; set; }
-        [Setting, DefaultValue(false)]
-        public bool Languageselected { get; set; }
-        [Setting, DefaultValue("")]
-        public string CpLogin { get; set; }
-        [Setting, DefaultValue("")]
-        public string CpPassword { get; set; }
-        [Setting, DefaultValue(false)]
-        public bool CpPanelBack { get; set; }
-        [Setting, DefaultValue(false)]
-        public bool ArmaPanelBack { get; set; }
-        [Setting, DefaultValue(false)]
-        public bool ProfMinBlack600 { get; set; }
-        [Setting, DefaultValue(1)]
-        public int UseServer { get; set; }
-        [Setting, DefaultValue(true)]
-        public bool DisablePlugin { get; set; }
+            [Setting, DefaultValue(false)]
+            public bool BotAllowUpdate { get; set; }
+            [Setting, DefaultValue(false)]
+            public bool AllowUpdate { get; set; }
+            [Setting, DefaultValue(false)]
+            public bool Allowlunch { get; set; }
+            [Setting, DefaultValue(0)]
+            public int BaseProfileToLunch { get; set; }
+            [Setting, DefaultValue(false)]
+            public bool AutoShutdownWhenUpdate { get; set; }
+            [Setting, DefaultValue(false)]
+            public bool PBMiningBlacksmithing { get; set; }
+            [Setting, DefaultValue(false)]
+            public bool BotPBMiningBlacksmithing { get; set; }
+            [Setting, DefaultValue(0)]
+            public int language { get; set; }
+            [Setting, DefaultValue(false)]
+            public bool Languageselected { get; set; }
+            [Setting, DefaultValue("")]
+            public string CpLogin { get; set; }
+            [Setting, DefaultValue("")]
+            public string CpPassword { get; set; }
+            [Setting, DefaultValue(false)]
+            public bool CpPanelBack { get; set; }
+            [Setting, DefaultValue(false)]
+            public bool ArmaPanelBack { get; set; }
+            [Setting, DefaultValue(false)]
+            public bool ProfMinBlack600 { get; set; }
+            [Setting, DefaultValue(1)]
+            public int UseServer { get; set; }
+            [Setting, DefaultValue(true)]
+            public bool DisablePlugin { get; set; }
         }
         
         // Attributes provided by caller

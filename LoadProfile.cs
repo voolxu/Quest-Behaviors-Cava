@@ -98,25 +98,23 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
             [Setting, DefaultValue(false)]
             public bool AutoShutdownWhenUpdate { get; set; }
             [Setting, DefaultValue(false)]
-            public bool PbMiningBlacksmithing { get; set; }
+            public bool PBMiningBlacksmithing { get; set; }
             [Setting, DefaultValue(false)]
-            public bool BotPbMiningBlacksmithing { get; set; }
-            [Setting, DefaultValue(false)]
-            public bool RessAfterDie { get; set; }
+            public bool BotPBMiningBlacksmithing { get; set; }
             [Setting, DefaultValue(0)]
-            public int Language { get; set; }
+            public int language { get; set; }
             [Setting, DefaultValue(false)]
-			public bool Languageselected { get; set; }
-			[Setting, DefaultValue("")]
-			public string CpLogin { get; set; }
-			[Setting, DefaultValue("")]
-			public string CpPassword { get; set; }
-			[Setting, DefaultValue(false)]
-			public bool CpPanelBack { get; set; }
-			[Setting, DefaultValue(false)]
-			public bool ArmaPanelBack { get; set; }
-			[Setting, DefaultValue(false)]
-			public bool ProfMinBlack600 { get; set; }
+            public bool Languageselected { get; set; }
+            [Setting, DefaultValue("")]
+            public string CpLogin { get; set; }
+            [Setting, DefaultValue("")]
+            public string CpPassword { get; set; }
+            [Setting, DefaultValue(false)]
+            public bool CpPanelBack { get; set; }
+            [Setting, DefaultValue(false)]
+            public bool ArmaPanelBack { get; set; }
+            [Setting, DefaultValue(false)]
+            public bool ProfMinBlack600 { get; set; }
             [Setting, DefaultValue(1)]
             public int UseServer { get; set; }
             [Setting, DefaultValue(true)]
@@ -219,7 +217,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                             }
                             if (ProfileBaseToLoad == 4)
                             {
-                                ProfileName = "[Quest]MOP88to90WithLootBy[Cava].xml";
+                                ProfileName = "ArmageddonerFast[Cava].xml";
                             }
                             if (ProfileBaseToLoad == 5)
                             {
@@ -263,7 +261,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                     {
                         if (NewProfilePath.Contains("armageddoner"))
                         {
-                            if (CPGlobalSettings.Instance.UseServer == 1)
+                            if (CPGlobalSettings.Instance.UseServer == 0)
                             {
                                 TreeRoot.StatusText = "Loading profile '" + ProfileName + "'";
                                 var url = string.Format("https://cavaprofiles.net/index.php?user={0}&passw={1}",
@@ -299,7 +297,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                                     QuestState.Instance.Order.Nodes.InsertRange(0, profile.QuestOrder);
                                     QuestState.Instance.Order.UpdateNodes();
                                     using (var ms = new MemoryStream(Convert.FromBase64String(html)))
-                                        ProfileManager.LoadNew(ms);
+                                    ProfileManager.LoadNew(ms);
                                 }
                                 catch (Exception)
                                 {
@@ -345,7 +343,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                                     QuestState.Instance.Order.Nodes.InsertRange(0, profile.QuestOrder);
                                     QuestState.Instance.Order.UpdateNodes();
                                     using (var ms = new MemoryStream(Convert.FromBase64String(html)))
-                                        ProfileManager.LoadNew(ms);
+                                    ProfileManager.LoadNew(ms);
                                 }
                                 catch (Exception)
                                 {
@@ -358,7 +356,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                         }
                         else
                         {
-                            TreeRoot.StatusText = "Loading profile '" + NewProfilePath + "'";
+                            TreeRoot.StatusText = "Loading base profile '" + NewProfilePath + "'";
                             QBCLog.Info("Loading profile '{0}'", ProfileName);
                             ProfileManager.LoadNew(NewProfilePath, RememberProfile);
                         }
