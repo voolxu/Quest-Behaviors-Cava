@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 //using System.Linq;
 //using System.Threading;
-
+using System.Threading;
 using CommonBehaviors.Actions;
 //using Styx;
 using Styx.Common;
@@ -43,7 +43,10 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
                IsAttributeProblem = true;
             }
         }
-        public String ProfileName { get; private set; }
+        public static String ProfileName { get; private set; }
+        private static Thread ChangeBotBase;
+        public static readonly string PathToCavaProfiles = Path.Combine(Utilities.AssemblyDirectory + @"\Default Profiles\Cava\");
+
         public class CPGlobalSettings : Settings
         {
             public static readonly CPGlobalSettings Instance = new CPGlobalSettings();
@@ -155,8 +158,17 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
                             if (ProfileBaseToLoad == 6) { ProfileName = "ArmageddonerNext[Cava]"; }
                             if (ProfileBaseToLoad == 7) { ProfileName = "emptymb600"; }
                             if (ProfileBaseToLoad == 8) { ProfileName = "emptymb300"; }
-														if (ProfileBaseToLoad == 10) { ProfileName = "[N-Quest]Armageddoner_Reserved[Cava]"; }
-                
+							if (ProfileBaseToLoad == 10) { ProfileName = "[N-Quest]Armageddoner_Reserved[Cava]"; }
+
+                            if (ProfileBaseToLoad == 7 || ProfileBaseToLoad == 8)
+                            {
+                                if (ChangeBotBase.ThreadState == ThreadState.Running)
+                                    ChangeBotBase.Abort();
+                                ChangeBotBase.Start();
+                                _isBehaviorDone = true;
+                                return;
+                            }
+               
                             if (ProfileBaseToLoad == 0)
                             {
                                 _isBehaviorDone = true;
@@ -199,9 +211,26 @@ namespace Honorbuddy.Quest_Behaviors.Cava.CavaLoader
             }
         }
 
+        private static void Start_PB_Bot()
+        {
+            BotBase pbBotBase;
+            BotManager.Instance.Bots.TryGetValue("ProfessionBuddy", out pbBotBase);
+            if (pbBotBase != null && BotManager.Current != pbBotBase)
+            {
+                TreeRoot.Stop();
+                BotManager.Instance.SetCurrent(pbBotBase);
+                new Sleep(2000);
+                if (ProfileName == "emptymb600")
+                    ProfileManager.LoadNew(Path.Combine(PathToCavaProfiles, "Scripts\\Prof\\MB\\[PB]MB(Cava).xml"), false);
+                if (ProfileName == "emptymb300")
+                    ProfileManager.LoadNew(Path.Combine(PathToCavaProfiles, "Scripts\\Prof\\MB\\Free[PB]MB(Cava).xml"), false);
+                TreeRoot.Start();
+            }
+        }
         public override void OnStart()
         {
             OnStart_HandleAttributeProblem();
+            ChangeBotBase = new Thread(Start_PB_Bot);
             if (!IsDone)
             {
                 TreeRoot.GoalText = this.GetType().Name + ": In Progress";
