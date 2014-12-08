@@ -41,12 +41,10 @@ namespace Honorbuddy.Quest_Behaviors.Cava.FrostfireRidgeHook
         private static WoWObject UsedIronHordeCannon { get { return (ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.Entry == 222870 && o.Distance < 100 && o.DynamicFlags != -65278 && !o.IsBlacklistedForInteraction())); } }
         private static WoWItem ItemBlackrockBlastingPowder { get { return (StyxWoW.Me.CarriedItems.FirstOrDefault(i => i.Entry == 104039)); } }
 
-
-
         // ReSharper disable once CSharpWarnings::CS1998
         static async Task<bool> CheckHasAura()
         {
-            if (Me.HasAura(173611) || Me.HasAura(161918))
+            if (Me.HasAura(173611) || Me.HasAura(161918) || Me.HasAura(158238))
             {
                 QBCLog.Debug("Harmfull aura detected. Movement Direction: back");
                 WoWMovement.Move(WoWMovement.MovementDirection.Backwards);
