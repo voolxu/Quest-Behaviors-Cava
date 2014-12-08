@@ -99,7 +99,15 @@ namespace Honorbuddy.Quest_Behaviors.Cava.TheBattleofThunderPass
         public WoWUnit Durotan { get { return ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.IsAlive && u.Entry == 76484 && u.Distance < 10).OrderBy(u => u.Distance).FirstOrDefault(); } }
 
         private int Stage { get { return ( Bots.DungeonBuddy.Helpers.ScriptHelpers.CurrentScenarioInfo.CurrentStage.StageNumber); } }
- 
+        private bool StageLoc1;
+        private bool StageLoc2;
+        private bool StageLoc3;
+        private bool StageLoc4;
+        private bool StageLoc5;
+        private bool StageLoc6;
+        private bool StageLoc7;
+        private bool StageLoc8;
+        private bool StageLoc9;
         #region Overrides of CustomForcedBehavior
 
         protected Composite CreateBehavior_MainCombat()
@@ -109,9 +117,119 @@ namespace Honorbuddy.Quest_Behaviors.Cava.TheBattleofThunderPass
 
 	    async Task<bool> MainCoroutine()
 	    {
-			if (!IsDone)
-		    {
-		        if (Stage == 0 || Stage == 1)
+	        if (!IsDone)
+	        {
+	            if (Stage == 1 && !StageLoc1)
+	            {
+
+	                if (Me.Location.Distance(_startStage) > 5)
+	                {
+	                    QBCLog.Info("Moving to Start Stage Location");
+	                    Navigator.MoveTo(_startStage);
+	                    return true;
+	                }
+	                StageLoc1 = true;
+	                return false;
+	            }
+                if (Stage == 2 && !StageLoc2)
+                {
+
+                    if (Me.Location.Distance(_startStage) > 5)
+                    {
+                        QBCLog.Info("Moving to Start Stage Location");
+                        Navigator.MoveTo(_startStage);
+                        return true;
+                    }
+                    StageLoc2 = true;
+                    return false;
+                }
+                if (Stage == 3 && !StageLoc3)
+                {
+
+                    if (Me.Location.Distance(_startStage) > 5)
+                    {
+                        QBCLog.Info("Moving to Start Stage Location");
+                        Navigator.MoveTo(_startStage);
+                        return true;
+                    }
+                    StageLoc3 = true;
+                    return false;
+                }
+                if (Stage == 4 && !StageLoc4)
+                {
+
+                    if (Me.Location.Distance(_startStage) > 5)
+                    {
+                        QBCLog.Info("Moving to Start Stage Location");
+                        Navigator.MoveTo(_startStage);
+                        return true;
+                    }
+                    StageLoc4 = true;
+                    return false;
+                }
+                if (Stage == 5 && !StageLoc5)
+                {
+
+                    if (Me.Location.Distance(_startStage) > 5)
+                    {
+                        QBCLog.Info("Moving to Start Stage Location");
+                        Navigator.MoveTo(_startStage);
+                        return true;
+                    }
+                    StageLoc5 = true;
+                    return false;
+                }
+                if (Stage == 6 && !StageLoc6)
+                {
+
+                    if (Me.Location.Distance(_startStage) > 5)
+                    {
+                        QBCLog.Info("Moving to Start Stage Location");
+                        Navigator.MoveTo(_startStage);
+                        return true;
+                    }
+                    StageLoc6 = true;
+                    return false;
+                }
+                if (Stage == 7 && !StageLoc7)
+                {
+
+                    if (Me.Location.Distance(_startStage) > 5)
+                    {
+                        QBCLog.Info("Moving to Start Stage Location");
+                        Navigator.MoveTo(_startStage);
+                        return true;
+                    }
+                    StageLoc7 = true;
+                    return false;
+                }
+                if (Stage == 8 && !StageLoc8)
+                {
+
+                    if (Me.Location.Distance(_startStage) > 5)
+                    {
+                        QBCLog.Info("Moving to Start Stage Location");
+                        Navigator.MoveTo(_startStage);
+                        return true;
+                    }
+                    StageLoc8 = true;
+                    return false;
+                }
+                if (Stage == 9 && !StageLoc9)
+                {
+
+                    if (Me.Location.Distance(_startStage) > 5)
+                    {
+                        QBCLog.Info("Moving to Start Stage Location");
+                        Navigator.MoveTo(_startStage);
+                        return true;
+                    }
+                    StageLoc9 = true;
+                    return false;
+                }
+	        
+
+	        if (Stage == 0 || Stage == 1)
 		        {
                     QBCLog.Info("Moving to Start Event Location");
                     Navigator.MoveTo(_startEvent);
