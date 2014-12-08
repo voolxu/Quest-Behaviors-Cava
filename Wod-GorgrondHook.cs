@@ -45,11 +45,24 @@ namespace Honorbuddy.Quest_Behaviors.Cava.TheLostIslesHook
         private static readonly WoWPoint SafeLocE = new WoWPoint(6232.965, 766.1824, 99.63248);
 
         private static WoWUnit CraterLordIgneous { get { return ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.Entry == 81528 && u.IsTargetingMeOrPet).OrderBy(u => u.Distance).FirstOrDefault(); } }
-        private static WoWObject OgreBarricade { get { return (ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.State.ToString() == "Ready" && o.Entry == 227114 && o.Distance < 3 )); } }
+        private static WoWObject OgreBarricade { get { return (ObjectManager.GetObjectsOfType<WoWGameObject>().FirstOrDefault(o => o.State.ToString() == "Ready" && o.Entry == 227114 && o.Distance < 3)); } }
         private static WoWItem ItemGorenDisguise { get { return (StyxWoW.Me.CarriedItems.FirstOrDefault(i => i.Entry == 112958)); } }
         private static WoWUnit GrotheUncreator { get { return ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.Entry == 81251 && u.IsTargetingMeOrPet).OrderBy(u => u.Distance).FirstOrDefault(); } }
         private static WoWUnit KhargaxtheDevourer { get { return ObjectManager.GetObjectsOfType<WoWUnit>().Where(u => u.Entry == 81537 && u.IsTargetingMeOrPet).OrderBy(u => u.Distance).FirstOrDefault(); } }
 
+
+        // ReSharper disable once CSharpWarnings::CS1998
+        static async Task<bool> CheckHasAura()
+        {
+            if (Me.HasAura(158238))
+            {
+                QBCLog.Debug("Harmfull aura detected. Movement Direction: back");
+                WoWMovement.Move(WoWMovement.MovementDirection.Backwards);
+                await Coroutine.Sleep(500);
+                WoWMovement.MoveStop(WoWMovement.MovementDirection.Backwards);
+            }
+            return false;
+        }
 
         // ReSharper disable once CSharpWarnings::CS1998
         static async Task<bool> CheckKhargaxtheDevourer()
@@ -103,7 +116,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.TheLostIslesHook
 
         static async Task<bool> CheckForGorenDisguise()
         {
-            if (Me.QuestLog.GetQuestById(36209) == null || Me.HasAura(164332) || ItemGorenDisguise == null)
+            if ((Me.QuestLog.GetQuestById(36209) == null && Me.QuestLog.GetQuestById(35041) == null) || Me.HasAura(164332) || ItemGorenDisguise == null)
                 return false;
             QBCLog.Info("Using Item Goren Disguise to apply Mask");
             WoWMovement.MoveStop();
@@ -123,7 +136,7 @@ namespace Honorbuddy.Quest_Behaviors.Cava.TheLostIslesHook
         {
             if (!Me.IsAlive)
                 return false;
-            return await CheckCraterLordIgneous() || await CheckForOgreBarricade() || await CheckForGorenDisguise() || await CheckGrotheUncreator() || await CheckKhargaxtheDevourer();
+            return await CheckCraterLordIgneous() || await CheckForOgreBarricade() || await CheckForGorenDisguise() || await CheckGrotheUncreator() || await CheckKhargaxtheDevourer() || await CheckHasAura();
         }
 
         public override void OnStart()
