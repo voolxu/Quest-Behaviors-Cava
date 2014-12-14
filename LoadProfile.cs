@@ -229,11 +229,11 @@ namespace Honorbuddy.Quest_Behaviors.Cava.LoadProfile
                             }
                             if (ProfileBaseToLoad == 7)
                             {
-                                ProfileName = "emptymb600.xml";
+                                ProfileName = "CavaProf\\MB\\[PB]MB(Cava).xml";
                             }
                             if (ProfileBaseToLoad == 8)
                             {
-                                ProfileName = "emptymb300.xml";
+                                ProfileName = "CavaProf\\MB\\Free[PB]MB(Cava).xml";
                             }
 
                             if (ProfileBaseToLoad == 0)
